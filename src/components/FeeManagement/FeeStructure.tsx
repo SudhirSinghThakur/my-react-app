@@ -1,11 +1,28 @@
 import React from 'react';
+import { Box, Typography, Paper, Button } from '@mui/material';
 
 const FeeStructure: React.FC = () => {
     return (
-        <div>
-            <h2>Fee Management</h2>
-            <p>Configure fee structures and track payments.</p>
-        </div>
+        <Box sx={{ padding: 3 }}>
+            <Paper elevation={3} sx={{ padding: 4, textAlign: 'center', marginBottom: 3 }}>
+                <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#2E7D32' }}>
+                    Fee Management
+                </Typography>
+                <Typography variant="body1" sx={{ marginTop: 2 }}>
+                    Configure fee structures and track payments.
+                </Typography>
+            </Paper>
+            <Button
+                variant="contained"
+                sx={{
+                    backgroundColor: '#2E7D32',
+                    color: '#FFFFFF',
+                    '&:hover': { backgroundColor: '#1B5E20' },
+                }}
+            >
+                Manage Fee Structure
+            </Button>
+        </Box>
     );
 };
 

@@ -32,6 +32,24 @@ const Dashboard: React.FC = () => {
                 { name: 'Noticeboard', path: '/noticeboard' },
             ],
         },
+        {
+            title: 'Library Management',
+            modules: [
+                { name: 'Library', path: '/library' },
+            ],
+        },
+        {
+            title: 'Transportation Management',
+            modules: [
+                { name: 'Transport', path: '/transport' },
+            ],
+        },
+        {
+            title: 'Reports and Analytics',
+            modules: [
+                { name: 'Reports', path: '/reports' },
+            ],
+        },
     ];
 
     return (
@@ -134,6 +152,7 @@ const Dashboard: React.FC = () => {
                         backgroundColor: '#E8F5E9',
                         borderRadius: 2,
                         textAlign: 'center',
+                        boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)',
                     }}
                 >
                     <Typography variant="h4" gutterBottom sx={{ color: '#1B5E20', fontWeight: 'bold' }}>

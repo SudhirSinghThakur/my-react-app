@@ -1,15 +1,15 @@
 import React from 'react';
 import { Box, Typography, Paper, Button } from '@mui/material';
 
-const Noticeboard: React.FC = () => {
+const Transport: React.FC = () => {
     return (
         <Box sx={{ padding: 3 }}>
             <Paper elevation={3} sx={{ padding: 4, textAlign: 'center', marginBottom: 3 }}>
                 <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#2E7D32' }}>
-                    Noticeboard
+                    Transportation Management
                 </Typography>
                 <Typography variant="body1" sx={{ marginTop: 2 }}>
-                    View announcements and updates.
+                    Manage bus routes, schedules, and student transport details.
                 </Typography>
             </Paper>
             <Button
@@ -20,10 +20,10 @@ const Noticeboard: React.FC = () => {
                     '&:hover': { backgroundColor: '#1B5E20' },
                 }}
             >
-                View Notices
+                View Transport Details
             </Button>
         </Box>
     );
 };
 
-export default Noticeboard;
+export default Transport;

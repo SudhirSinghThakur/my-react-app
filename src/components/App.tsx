@@ -14,6 +14,9 @@ import Noticeboard from '../components/CommunicationSystem/Noticeboard';
 import Login from '../components/Login';
 import Dashboard from '../components/Dashboard';
 import ProtectedRoute from './ProtectedRoute';
+import Library from './LibraryManagement/Library';
+import Transport from './TransportationManagement/Transport';
+import Reports from './ReportManagement/Reports';
 
 const App: React.FC = () => {
     return (
@@ -109,6 +112,30 @@ const App: React.FC = () => {
                         element={
                             <ProtectedRoute>
                                 <Noticeboard />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/library"
+                        element={
+                            <ProtectedRoute>
+                                <Library />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/transport"
+                        element={
+                            <ProtectedRoute>
+                                <Transport />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/reports"
+                        element={
+                            <ProtectedRoute>
+                                <Reports />
                             </ProtectedRoute>
                         }
                     />
