@@ -10,11 +10,14 @@ const Login: React.FC = () => {
     const navigate = useNavigate();
     const auth = useAuth();
 
-    const handleLogin = () => {
-        if (auth?.login(username, password)) {
-            navigate('/dashboard'); // Redirect to Dashboard
-        } else {
-            setError('Invalid username or password');
+    const handleLogin = async () => {
+        if (auth) {
+            const success = await auth.login(username, password); // Wait for login to complete
+            if (success) {
+                navigate('/dashboard'); // Redirect to Dashboard
+            } else {
+                setError('Invalid username or password');
+            }
         }
     };
 

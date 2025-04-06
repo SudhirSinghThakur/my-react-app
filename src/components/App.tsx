@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 import { Box } from '@mui/material';
 import Admin from '../components/UserManagement/Admin';
 import Teacher from '../components/UserManagement/Teacher';
@@ -20,128 +20,126 @@ import Reports from './ReportManagement/Reports';
 
 const App: React.FC = () => {
     return (
-        <Router>
-            <Box sx={{ flexGrow: 1 }}>
-                <Routes>
-                    {/* Public Routes */}
-                    <Route path="/" element={<Login />} />
+        <Box sx={{ flexGrow: 1 }}>
+            <Routes>
+                {/* Public Routes */}
+                <Route path="/" element={<Login />} />
 
-                    {/* Protected Routes */}
-                    <Route
-                        path="/dashboard"
-                        element={
-                            <ProtectedRoute>
-                                <Dashboard />
-                            </ProtectedRoute>
-                        }
-                    />
-                    <Route
-                        path="/admin"
-                        element={
-                            <ProtectedRoute>
-                                <Admin />
-                            </ProtectedRoute>
-                        }
-                    />
-                    <Route
-                        path="/teacher"
-                        element={
-                            <ProtectedRoute>
-                                <Teacher />
-                            </ProtectedRoute>
-                        }
-                    />
-                    <Route
-                        path="/student"
-                        element={
-                            <ProtectedRoute>
-                                <Student />
-                            </ProtectedRoute>
-                        }
-                    />
-                    <Route
-                        path="/parent"
-                        element={
-                            <ProtectedRoute>
-                                <Parent />
-                            </ProtectedRoute>
-                        }
-                    />
-                    <Route
-                        path="/enrollment"
-                        element={
-                            <ProtectedRoute>
-                                <Enrollment />
-                            </ProtectedRoute>
-                        }
-                    />
-                    <Route
-                        path="/attendance"
-                        element={
-                            <ProtectedRoute>
-                                <Attendance />
-                            </ProtectedRoute>
-                        }
-                    />
-                    <Route
-                        path="/timetable"
-                        element={
-                            <ProtectedRoute>
-                                <Timetable />
-                            </ProtectedRoute>
-                        }
-                    />
-                    <Route
-                        path="/exams"
-                        element={
-                            <ProtectedRoute>
-                                <Exams />
-                            </ProtectedRoute>
-                        }
-                    />
-                    <Route
-                        path="/fee-structure"
-                        element={
-                            <ProtectedRoute>
-                                <FeeStructure />
-                            </ProtectedRoute>
-                        }
-                    />
-                    <Route
-                        path="/noticeboard"
-                        element={
-                            <ProtectedRoute>
-                                <Noticeboard />
-                            </ProtectedRoute>
-                        }
-                    />
-                    <Route
-                        path="/library"
-                        element={
-                            <ProtectedRoute>
-                                <Library />
-                            </ProtectedRoute>
-                        }
-                    />
-                    <Route
-                        path="/transport"
-                        element={
-                            <ProtectedRoute>
-                                <Transport />
-                            </ProtectedRoute>
-                        }
-                    />
-                    <Route
-                        path="/reports"
-                        element={
-                            <ProtectedRoute>
-                                <Reports />
-                            </ProtectedRoute>
-                        }
-                    />
-                </Routes>
-            </Box>
-        </Router>
+                {/* Protected Routes */}
+                <Route
+                    path="/dashboard"
+                    element={
+                        <ProtectedRoute>
+                            <Dashboard />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/admin"
+                    element={
+                        <ProtectedRoute>
+                            <Admin />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/teacher"
+                    element={
+                        <ProtectedRoute>
+                            <Teacher />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/student"
+                    element={
+                        <ProtectedRoute>
+                            <Student />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/parent"
+                    element={
+                        <ProtectedRoute>
+                            <Parent />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/enrollment"
+                    element={
+                        <ProtectedRoute>
+                            <Enrollment />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/attendance"
+                    element={
+                        <ProtectedRoute>
+                            <Attendance />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/timetable"
+                    element={
+                        <ProtectedRoute>
+                            <Timetable />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/exams"
+                    element={
+                        <ProtectedRoute>
+                            <Exams />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/fee-structure"
+                    element={
+                        <ProtectedRoute>
+                            <FeeStructure />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/noticeboard"
+                    element={
+                        <ProtectedRoute>
+                            <Noticeboard />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/library"
+                    element={
+                        <ProtectedRoute>
+                            <Library />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/transport"
+                    element={
+                        <ProtectedRoute>
+                            <Transport />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/reports"
+                    element={
+                        <ProtectedRoute>
+                            <Reports />
+                        </ProtectedRoute>
+                    }
+                />
+            </Routes>
+        </Box>
     );
 };
 
