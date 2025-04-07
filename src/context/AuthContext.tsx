@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
+import config from '../config'; // Import the config file
 
 interface AuthContextType {
     isAuthenticated: boolean;
@@ -9,11 +10,6 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-const DEFAULT_CREDENTIALS = {
-    username: 'admin',
-    password: 'password',
-};
-
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const navigate = useNavigate();
@@ -21,7 +17,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const login = async (username: string, password: string): Promise<boolean> => {
         try {
-            const response = await fetch('https://localhost:44390/api/Auth/login', {
+            const response = await fetch(`${config.BASE_URL}/Auth/login`, { // Use BASE_URL
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password }),
@@ -29,7 +25,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
             if (response.ok) {
                 const data = await response.json();
-                if (data.token) { // Ensure the token exists in the response
+                if (data.token) {
                     localStorage.setItem('token', data.token); // Store the token
                     setIsAuthenticated(true);
                     return true;
@@ -40,22 +36,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         } catch (error) {
             console.error('Login failed:', error);
         }
-        setIsAuthenticated(false); // Ensure authentication is false if login fails
+        setIsAuthenticated(false);
         return false;
     };
 
     const logout = () => {
         localStorage.removeItem('token');
         setIsAuthenticated(false);
-    };
-
-    const handleLogin = async () => {
-        const success = await login(DEFAULT_CREDENTIALS.username, DEFAULT_CREDENTIALS.password);
-        if (success) {
-            navigate('/dashboard'); // Redirect to Dashboard
-        } else {
-            setError('Invalid username or password');
-        }
+        navigate('/'); // Redirect to login page
     };
 
     return (
