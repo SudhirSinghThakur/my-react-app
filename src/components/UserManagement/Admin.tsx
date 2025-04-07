@@ -20,6 +20,7 @@ import {
     FormControl,
     InputLabel,
 } from '@mui/material';
+import config from '../../config'; // Import the config file
 
 interface User {
     id: number;
@@ -34,68 +35,98 @@ const Admin: React.FC = () => {
     const [openAdd, setOpenAdd] = useState(false);
     const [openEdit, setOpenEdit] = useState(false);
 
-    const roles = ['Admin', 'Teacher']; // Available roles
+    const roles = ['Admin', 'Teacher', 'Student', 'Parent']; // Available roles
 
     useEffect(() => {
         fetchUsers();
     }, []);
 
+    // Fetch all users
     const fetchUsers = async () => {
-        const response = await fetch('https://localhost:44390/api/Admin/users', {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem('token')}`,
-            },
-        });
-        const data = await response.json();
-        setUsers(data);
-    };
-
-    const handleAddUser = async () => {
-        const response = await fetch('https://localhost:44390/api/Admin/users', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${localStorage.getItem('token')}`,
-            },
-            body: JSON.stringify(newUser),
-        });
-
-        if (response.ok) {
-            fetchUsers();
-            setOpenAdd(false);
-            setNewUser({ username: '', role: '' });
+        try {
+            const response = await fetch(`${config.BASE_URL}/Admin/users`, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('token')}`,
+                },
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setUsers(data);
+            } else {
+                console.error('Failed to fetch users');
+            }
+        } catch (error) {
+            console.error('Error fetching users:', error);
         }
     };
 
-    const handleEditUser = async () => {
-        if (editUser) {
-            const response = await fetch(`https://localhost:44390/api/Admin/users/${editUser.id}`, {
-                method: 'PUT',
+    // Add a new user
+    const handleAddUser = async () => {
+        try {
+            const response = await fetch(`${config.BASE_URL}/Admin/users`, {
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${localStorage.getItem('token')}`,
                 },
-                body: JSON.stringify(editUser),
+                body: JSON.stringify(newUser),
             });
 
             if (response.ok) {
                 fetchUsers();
-                setOpenEdit(false);
-                setEditUser(null);
+                setOpenAdd(false);
+                setNewUser({ username: '', role: '' });
+            } else {
+                console.error('Failed to add user');
+            }
+        } catch (error) {
+            console.error('Error adding user:', error);
+        }
+    };
+
+    // Edit an existing user
+    const handleEditUser = async () => {
+        if (editUser) {
+            try {
+                const response = await fetch(`${config.BASE_URL}/Admin/users/${editUser.id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${localStorage.getItem('token')}`,
+                    },
+                    body: JSON.stringify(editUser),
+                });
+
+                if (response.ok) {
+                    fetchUsers();
+                    setOpenEdit(false);
+                    setEditUser(null);
+                } else {
+                    console.error('Failed to edit user');
+                }
+            } catch (error) {
+                console.error('Error editing user:', error);
             }
         }
     };
 
+    // Delete a user
     const handleDeleteUser = async (id: number) => {
-        const response = await fetch(`https://localhost:44390/api/Admin/users/${id}`, {
-            method: 'DELETE',
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem('token')}`,
-            },
-        });
+        try {
+            const response = await fetch(`${config.BASE_URL}/Admin/users/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('token')}`,
+                },
+            });
 
-        if (response.ok) {
-            fetchUsers();
+            if (response.ok) {
+                fetchUsers();
+            } else {
+                console.error('Failed to delete user');
+            }
+        } catch (error) {
+            console.error('Error deleting user:', error);
         }
     };
 
