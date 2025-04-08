@@ -25,6 +25,8 @@ import {
 } from '@mui/material';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 import SearchIcon from '@mui/icons-material/Search';
 import config from '../../config'; // Import the config file
 
@@ -52,7 +54,9 @@ const Enrollment: React.FC = () => {
     const [students, setStudents] = useState<Student[]>([]);
     const [loading, setLoading] = useState(false);
     const [openAdd, setOpenAdd] = useState(false);
-    const [formData, setFormData] = useState({
+    const [openEdit, setOpenEdit] = useState(false);
+    const [formData, setFormData] = useState<Student>({
+        id: 0,
         studentName: '',
         dateOfBirth: '',
         fatherName: '',
@@ -134,6 +138,91 @@ const Enrollment: React.FC = () => {
         [filteredStudents, page, rowsPerPage]
     );
 
+    // Add a new student
+    const handleAddStudent = async () => {
+        try {
+            const response = await fetch(`${config.BASE_URL}/Students`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${localStorage.getItem('token')}`,
+                },
+                body: JSON.stringify(formData),
+            });
+
+            if (response.ok) {
+                fetchStudents();
+                setOpenAdd(false);
+                setFormData({
+                    id: 0,
+                    studentName: '',
+                    dateOfBirth: '',
+                    fatherName: '',
+                    motherName: '',
+                    fatherOccupation: '',
+                    motherOccupation: '',
+                    fatherQualification: '',
+                    motherQualification: '',
+                    addressResidential: '',
+                    addressOffice: '',
+                    phoneResidential: '',
+                    phoneOffice: '',
+                    guardianName: '',
+                    nationality: '',
+                    religion: '',
+                    class: '',
+                });
+            } else {
+                console.error('Failed to add student');
+            }
+        } catch (error) {
+            console.error('Error adding student:', error);
+        }
+    };
+
+    // Edit a student
+    const handleEditStudent = async () => {
+        try {
+            const response = await fetch(`${config.BASE_URL}/Students/${formData.id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${localStorage.getItem('token')}`,
+                },
+                body: JSON.stringify(formData),
+            });
+
+            if (response.ok) {
+                fetchStudents();
+                setOpenEdit(false);
+            } else {
+                console.error('Failed to edit student');
+            }
+        } catch (error) {
+            console.error('Error editing student:', error);
+        }
+    };
+
+    // Delete a student
+    const handleDeleteStudent = async (id: number) => {
+        try {
+            const response = await fetch(`${config.BASE_URL}/Students/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('token')}`,
+                },
+            });
+
+            if (response.ok) {
+                fetchStudents();
+            } else {
+                console.error('Failed to delete student');
+            }
+        } catch (error) {
+            console.error('Error deleting student:', error);
+        }
+    };
+
     useEffect(() => {
         fetchStudents();
     }, []);
@@ -166,22 +255,31 @@ const Enrollment: React.FC = () => {
                             color: '#FFFFFF',
                             '&:hover': { backgroundColor: '#1B5E20' },
                         }}
-                        onClick={() => setOpenAdd(true)}
-                    >
-                        Add New Student
-                    </Button>
-                    <Button
-                        variant="contained"
-                        startIcon={<UploadFileIcon />}
-                        component="label"
-                        sx={{
-                            backgroundColor: '#FFC107',
-                            color: '#2E7D32',
-                            '&:hover': { backgroundColor: '#FFB300' },
+                        onClick={() => {
+                            // Reset formData to initial values
+                            setFormData({
+                                id: 0,
+                                studentName: '',
+                                dateOfBirth: '',
+                                fatherName: '',
+                                motherName: '',
+                                fatherOccupation: '',
+                                motherOccupation: '',
+                                fatherQualification: '',
+                                motherQualification: '',
+                                addressResidential: '',
+                                addressOffice: '',
+                                phoneResidential: '',
+                                phoneOffice: '',
+                                guardianName: '',
+                                nationality: '',
+                                religion: '',
+                                class: '',
+                            });
+                            setOpenAdd(true); // Open the Add New Student dialog
                         }}
                     >
-                        Bulk Upload
-                        <input type="file" accept=".csv, .xlsx" hidden />
+                        Add New Student
                     </Button>
                 </Box>
             </Paper>
@@ -247,6 +345,7 @@ const Enrollment: React.FC = () => {
                                 Mother's Name
                             </TableCell>
                             <TableCell sx={{ fontWeight: 'bold', color: '#2E7D32' }}>Class</TableCell>
+                            <TableCell sx={{ fontWeight: 'bold', color: '#2E7D32' }}>Actions</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -259,11 +358,33 @@ const Enrollment: React.FC = () => {
                                     <TableCell>{student.fatherName}</TableCell>
                                     <TableCell>{student.motherName}</TableCell>
                                     <TableCell>{student.class}</TableCell>
+                                    <TableCell>
+                                        <Button
+                                            variant="contained"
+                                            color="primary"
+                                            startIcon={<EditIcon />}
+                                            sx={{ marginRight: 1 }}
+                                            onClick={() => {
+                                                setFormData(student);
+                                                setOpenEdit(true);
+                                            }}
+                                        >
+                                            Edit
+                                        </Button>
+                                        <Button
+                                            variant="contained"
+                                            color="error"
+                                            startIcon={<DeleteIcon />}
+                                            onClick={() => handleDeleteStudent(student.id)}
+                                        >
+                                            Delete
+                                        </Button>
+                                    </TableCell>
                                 </TableRow>
                             ))
                         ) : (
                             <TableRow>
-                                <TableCell colSpan={6} align="center">
+                                <TableCell colSpan={7} align="center">
                                     No students found.
                                 </TableCell>
                             </TableRow>
@@ -291,17 +412,19 @@ const Enrollment: React.FC = () => {
                 <DialogContent>
                     <Grid container spacing={2}>
                         {Object.keys(formData).map((key) => (
-                            <Grid item xs={12} sm={6} key={key}>
-                                <TextField
-                                    label={key
-                                        .replace(/([A-Z])/g, ' $1')
-                                        .replace(/^./, (str) => str.toUpperCase())}
-                                    name={key}
-                                    fullWidth
-                                    value={(formData as any)[key]}
-                                    onChange={handleChange}
-                                />
-                            </Grid>
+                            key !== 'id' && (
+                                <Grid item xs={12} sm={6} key={key}>
+                                    <TextField
+                                        label={key
+                                            .replace(/([A-Z])/g, ' $1')
+                                            .replace(/^./, (str) => str.toUpperCase())}
+                                        name={key}
+                                        fullWidth
+                                        value={(formData as any)[key]}
+                                        onChange={handleChange}
+                                    />
+                                </Grid>
+                            )
                         ))}
                     </Grid>
                 </DialogContent>
@@ -316,9 +439,51 @@ const Enrollment: React.FC = () => {
                             color: '#FFFFFF',
                             '&:hover': { backgroundColor: '#1B5E20' },
                         }}
-                        onClick={() => {}}
+                        onClick={handleAddStudent}
                     >
                         Submit
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Edit Student Dialog */}
+            <Dialog open={openEdit} onClose={() => setOpenEdit(false)} fullWidth maxWidth="lg">
+                <DialogTitle sx={{ textAlign: 'center', fontWeight: 'bold', color: '#2E7D32' }}>
+                    Edit Student
+                </DialogTitle>
+                <DialogContent>
+                    <Grid container spacing={2}>
+                        {Object.keys(formData).map((key) => (
+                            key !== 'id' && (
+                                <Grid item xs={12} sm={6} key={key}>
+                                    <TextField
+                                        label={key
+                                            .replace(/([A-Z])/g, ' $1')
+                                            .replace(/^./, (str) => str.toUpperCase())}
+                                        name={key}
+                                        fullWidth
+                                        value={(formData as any)[key]}
+                                        onChange={handleChange}
+                                    />
+                                </Grid>
+                            )
+                        ))}
+                    </Grid>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setOpenEdit(false)} color="secondary">
+                        Cancel
+                    </Button>
+                    <Button
+                        variant="contained"
+                        sx={{
+                            backgroundColor: '#2E7D32',
+                            color: '#FFFFFF',
+                            '&:hover': { backgroundColor: '#1B5E20' },
+                        }}
+                        onClick={handleEditStudent}
+                    >
+                        Save Changes
                     </Button>
                 </DialogActions>
             </Dialog>
