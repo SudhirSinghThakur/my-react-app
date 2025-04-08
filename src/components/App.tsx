@@ -1,145 +1,52 @@
 import React from 'react';
 import { Route, Routes } from 'react-router-dom';
-import { Box } from '@mui/material';
-import Admin from '../components/UserManagement/Admin';
-import Teacher from '../components/UserManagement/Teacher';
-import Student from '../components/UserManagement/Student';
-import Parent from '../components/UserManagement/Parent';
-import Enrollment from '../components/StudentInformation/Enrollment';
-import Attendance from '../components/StudentInformation/Attendance';
-import Timetable from '../components/ClassroomManagement/Timetable';
-import Exams from '../components/ExaminationManagement/Exams';
-import FeeStructure from '../components/FeeManagement/FeeStructure';
-import Noticeboard from '../components/CommunicationSystem/Noticeboard';
-import Login from '../components/Login';
-import Dashboard from '../components/Dashboard';
-import ProtectedRoute from './ProtectedRoute';
+import Login from './Login';
+import Dashboard from './Dashboard';
+import Admin from './UserManagement/Admin';
+import Teacher from './UserManagement/Teacher';
+import Student from './UserManagement/Student';
+import Parent from './UserManagement/Parent';
+import Enrollment from './StudentInformation/Enrollment';
+import Attendance from './StudentInformation/Attendance';
+import Timetable from './ClassroomManagement/Timetable';
+import Exams from './ExaminationManagement/Exams';
+import FeeStructure from './FeeManagement/FeeStructure';
+import Noticeboard from './CommunicationSystem/Noticeboard';
 import Library from './LibraryManagement/Library';
 import Transport from './TransportationManagement/Transport';
 import Reports from './ReportManagement/Reports';
+import ProtectedRoute from './ProtectedRoute';
 
 const App: React.FC = () => {
     return (
-        <Box sx={{ flexGrow: 1 }}>
-            <Routes>
-                {/* Public Routes */}
-                <Route path="/" element={<Login />} />
+        <Routes>
+            {/* Public Routes */}
+            <Route path="/" element={<Login />} />
 
-                {/* Protected Routes */}
-                <Route
-                    path="/dashboard"
-                    element={
-                        <ProtectedRoute>
-                            <Dashboard />
-                        </ProtectedRoute>
-                    }
-                />
-                <Route
-                    path="/admin"
-                    element={
-                        <ProtectedRoute>
-                            <Admin />
-                        </ProtectedRoute>
-                    }
-                />
-                <Route
-                    path="/teacher"
-                    element={
-                        <ProtectedRoute>
-                            <Teacher />
-                        </ProtectedRoute>
-                    }
-                />
-                <Route
-                    path="/student"
-                    element={
-                        <ProtectedRoute>
-                            <Student />
-                        </ProtectedRoute>
-                    }
-                />
-                <Route
-                    path="/parent"
-                    element={
-                        <ProtectedRoute>
-                            <Parent />
-                        </ProtectedRoute>
-                    }
-                />
-                <Route
-                    path="/enrollment"
-                    element={
-                        <ProtectedRoute>
-                            <Enrollment />
-                        </ProtectedRoute>
-                    }
-                />
-                <Route
-                    path="/attendance"
-                    element={
-                        <ProtectedRoute>
-                            <Attendance />
-                        </ProtectedRoute>
-                    }
-                />
-                <Route
-                    path="/timetable"
-                    element={
-                        <ProtectedRoute>
-                            <Timetable />
-                        </ProtectedRoute>
-                    }
-                />
-                <Route
-                    path="/exams"
-                    element={
-                        <ProtectedRoute>
-                            <Exams />
-                        </ProtectedRoute>
-                    }
-                />
-                <Route
-                    path="/fee-structure"
-                    element={
-                        <ProtectedRoute>
-                            <FeeStructure />
-                        </ProtectedRoute>
-                    }
-                />
-                <Route
-                    path="/noticeboard"
-                    element={
-                        <ProtectedRoute>
-                            <Noticeboard />
-                        </ProtectedRoute>
-                    }
-                />
-                <Route
-                    path="/library"
-                    element={
-                        <ProtectedRoute>
-                            <Library />
-                        </ProtectedRoute>
-                    }
-                />
-                <Route
-                    path="/transport"
-                    element={
-                        <ProtectedRoute>
-                            <Transport />
-                        </ProtectedRoute>
-                    }
-                />
-                <Route
-                    path="/reports"
-                    element={
-                        <ProtectedRoute>
-                            <Reports />
-                        </ProtectedRoute>
-                    }
-                />
-            </Routes>
-        </Box>
+            {/* Dashboard with Nested Routes */}
+            <Route
+                path="/dashboard"
+                element={
+                    <ProtectedRoute>
+                        <Dashboard />
+                    </ProtectedRoute>
+                }
+            >
+                <Route path="admin" element={<Admin />} />
+                <Route path="teacher" element={<Teacher />} />
+                <Route path="student" element={<Student />} />
+                <Route path="parent" element={<Parent />} />
+                <Route path="enrollment" element={<Enrollment />} />
+                <Route path="attendance" element={<Attendance />} />
+                <Route path="timetable" element={<Timetable />} />
+                <Route path="exams" element={<Exams />} />
+                <Route path="fee-structure" element={<FeeStructure />} />
+                <Route path="noticeboard" element={<Noticeboard />} />
+                <Route path="library" element={<Library />} />
+                <Route path="transport" element={<Transport />} />
+                <Route path="reports" element={<Reports />} />
+            </Route>
+        </Routes>
     );
 };
 
