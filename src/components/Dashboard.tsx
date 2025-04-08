@@ -1,53 +1,90 @@
 import React from 'react';
-import { AppBar, Toolbar, Typography, Box, Grid, Paper, Button, Drawer, List, ListItem, ListItemText, Divider, CssBaseline } from '@mui/material';
+import {
+    AppBar,
+    Toolbar,
+    Typography,
+    Box,
+    Grid,
+    Card,
+    CardContent,
+    CardActionArea,
+    CardMedia,
+    Drawer,
+    List,
+    ListItem,
+    ListItemText,
+    Divider,
+    CssBaseline,
+    IconButton,
+    Menu,
+    MenuItem,
+} from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import SchoolIcon from '@mui/icons-material/School';
+import PeopleIcon from '@mui/icons-material/People';
+import EventNoteIcon from '@mui/icons-material/EventNote';
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
+import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
+import BarChartIcon from '@mui/icons-material/BarChart';
 
 const Dashboard: React.FC = () => {
     const navigate = useNavigate();
+    const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+
+    const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleMenuClose = () => {
+        setAnchorEl(null);
+    };
 
     // Categorized modules
     const categories = [
         {
             title: 'User Management',
             modules: [
-                { name: 'Admin', path: '/admin' },
-                { name: 'Teacher', path: '/teacher' },
-                { name: 'Student', path: '/student' },
-                { name: 'Parent', path: '/parent' },
+                { name: 'Admin', path: '/admin', icon: <PeopleIcon /> },
+                { name: 'Teacher', path: '/teacher', icon: <SchoolIcon /> },
+                { name: 'Student', path: '/student', icon: <SchoolIcon /> },
+                { name: 'Parent', path: '/parent', icon: <PeopleIcon /> },
             ],
         },
         {
             title: 'Academic Management',
             modules: [
-                { name: 'Enrollment', path: '/enrollment' },
-                { name: 'Attendance', path: '/attendance' },
-                { name: 'Timetable', path: '/timetable' },
-                { name: 'Exams', path: '/exams' },
+                { name: 'Enrollment', path: '/enrollment', icon: <DashboardIcon /> },
+                { name: 'Attendance', path: '/attendance', icon: <EventNoteIcon /> },
+                { name: 'Timetable', path: '/timetable', icon: <EventNoteIcon /> },
+                { name: 'Exams', path: '/exams', icon: <EventNoteIcon /> },
             ],
         },
         {
             title: 'Administrative Tools',
             modules: [
-                { name: 'Fee Structure', path: '/fee-structure' },
-                { name: 'Noticeboard', path: '/noticeboard' },
+                { name: 'Fee Structure', path: '/fee-structure', icon: <AttachMoneyIcon /> },
+                { name: 'Noticeboard', path: '/noticeboard', icon: <EventNoteIcon /> },
             ],
         },
         {
             title: 'Library Management',
             modules: [
-                { name: 'Library', path: '/library' },
+                { name: 'Library', path: '/library', icon: <LibraryBooksIcon /> },
             ],
         },
         {
             title: 'Transportation Management',
             modules: [
-                { name: 'Transport', path: '/transport' },
+                { name: 'Transport', path: '/transport', icon: <DirectionsBusIcon /> },
             ],
         },
         {
             title: 'Reports and Analytics',
             modules: [
-                { name: 'Reports', path: '/reports' },
+                { name: 'Reports', path: '/reports', icon: <BarChartIcon /> },
             ],
         },
     ];
@@ -60,36 +97,66 @@ const Dashboard: React.FC = () => {
             <Drawer
                 variant="permanent"
                 sx={{
-                    width: 280,
+                    width: 240,
                     flexShrink: 0,
                     [`& .MuiDrawer-paper`]: {
-                        width: 280,
+                        width: 240,
                         boxSizing: 'border-box',
                         backgroundColor: '#2E7D32',
                         color: '#FFFFFF',
+                        display: 'flex',
+                        flexDirection: 'column', // Ensure content stacks vertically
+                        height: '100vh', // Ensure the sidebar takes the full height of the viewport
+                        overflow: 'hidden', // Prevent scrolling
                     },
                 }}
             >
-                <Toolbar>
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
-                        <img src="/Logo.jpg" alt="School Logo" style={{ height: 50, marginRight: 10 }} />
-                        <Typography variant="h6" noWrap sx={{ fontWeight: 'bold', textAlign: 'center' }}>
-                            School Management
-                        </Typography>
-                    </Box>
-                </Toolbar>
+                {/* Branding Section */}
+                <Box
+                    sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: 2,
+                        backgroundColor: '#1B5E20',
+                    }}
+                >
+                    <img
+                        src="/Logo.jpg"
+                        alt="School Logo"
+                        style={{ height: 50, marginRight: 10 }}
+                    />
+                    <Typography
+                        variant="h6"
+                        noWrap
+                        sx={{
+                            fontWeight: 'bold',
+                            textAlign: 'center',
+                            color: '#FFFFFF',
+                        }}
+                    >
+                        School Management
+                    </Typography>
+                </Box>
                 <Divider sx={{ backgroundColor: '#FFFFFF' }} />
-                <List>
+
+                {/* Sidebar Items */}
+                <List
+                    sx={{
+                        flexGrow: 1, // Allow the list to grow and fill the remaining space
+                    }}
+                >
                     {categories.map((category) => (
                         <React.Fragment key={category.title}>
+                            {/* Section Title */}
                             <Typography
                                 variant="subtitle1"
                                 sx={{
-                                    padding: 2,
+                                    padding: 1,
                                     fontWeight: 'bold',
                                     color: '#FFC107',
                                     textTransform: 'uppercase',
-                                    fontSize: '0.9rem',
+                                    fontSize: '0.8rem',
                                 }}
                             >
                                 {category.title}
@@ -101,9 +168,28 @@ const Dashboard: React.FC = () => {
                                     onClick={() => navigate(module.path)}
                                     sx={{
                                         '&:hover': { backgroundColor: '#1B5E20' },
+                                        '&.Mui-selected': {
+                                            backgroundColor: '#FFC107',
+                                            color: '#2E7D32',
+                                            '&:hover': { backgroundColor: '#FFB300' },
+                                        },
                                     }}
                                 >
-                                    <ListItemText primary={module.name} />
+                                    <IconButton
+                                        sx={{
+                                            color: '#FFFFFF',
+                                            marginRight: 2,
+                                        }}
+                                    >
+                                        {module.icon}
+                                    </IconButton>
+                                    <ListItemText
+                                        primary={module.name}
+                                        primaryTypographyProps={{
+                                            fontSize: '0.9rem',
+                                            fontWeight: 'bold',
+                                        }}
+                                    />
                                 </ListItem>
                             ))}
                             <Divider sx={{ backgroundColor: '#FFFFFF' }} />
@@ -111,16 +197,16 @@ const Dashboard: React.FC = () => {
                     ))}
                 </List>
             </Drawer>
-
+                    
             {/* Main Content */}
-            <Box sx={{ flexGrow: 1, padding: 3 }}>
+            <Box sx={{ flexGrow: 1, padding: 2 }}>
                 {/* Top Navigation Bar */}
                 <AppBar
                     position="static"
                     sx={{
                         backgroundColor: '#2E7D32',
-                        marginBottom: 3,
-                        borderRadius: 2,
+                        marginBottom: 2,
+                        borderRadius: 1,
                         boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.2)',
                     }}
                 >
@@ -128,91 +214,70 @@ const Dashboard: React.FC = () => {
                         <Typography variant="h6" sx={{ flexGrow: 1 }}>
                             Dashboard
                         </Typography>
-                        <Button
+                        <IconButton
                             color="inherit"
-                            onClick={() => navigate('/')}
+                            onClick={handleMenuOpen}
                             sx={{
-                                backgroundColor: '#FFC107',
-                                color: '#2E7D32',
-                                fontWeight: 'bold',
-                                '&:hover': { backgroundColor: '#FFD54F' },
+                                '&:hover': { backgroundColor: '#1B5E20' },
                             }}
                         >
-                            Logout
-                        </Button>
+                            <AccountCircleIcon />
+                        </IconButton>
+                        <Menu
+                            anchorEl={anchorEl}
+                            open={Boolean(anchorEl)}
+                            onClose={handleMenuClose}
+                        >
+                            <MenuItem onClick={() => navigate('/')}>Logout</MenuItem>
+                        </Menu>
                     </Toolbar>
                 </AppBar>
 
-                {/* Welcome Section */}
-                <Paper
-                    elevation={3}
-                    sx={{
-                        padding: 4,
-                        marginBottom: 3,
-                        backgroundColor: '#E8F5E9',
-                        borderRadius: 2,
-                        textAlign: 'center',
-                        boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)',
-                    }}
-                >
-                    <Typography variant="h4" gutterBottom sx={{ color: '#1B5E20', fontWeight: 'bold' }}>
-                        Welcome to the School Management Dashboard
-                    </Typography>
-                    <Typography variant="body1" sx={{ color: '#1B5E20' }}>
-                        Use the navigation menu on the left or the quick links below to access different modules of the School Management System.
-                    </Typography>
-                </Paper>
-
                 {/* Quick Links Section */}
-                {categories.map((category) => (
-                    <Box key={category.title} sx={{ marginBottom: 4 }}>
-                        <Typography
-                            variant="h5"
-                            gutterBottom
-                            sx={{
-                                color: '#2E7D32',
-                                fontWeight: 'bold',
-                                textTransform: 'uppercase',
-                                marginBottom: 2,
-                            }}
-                        >
-                            {category.title}
-                        </Typography>
-                        <Grid container spacing={3}>
-                            {category.modules.map((module) => (
-                                <Grid item xs={12} sm={6} md={4} key={module.name}>
-                                    <Paper
-                                        elevation={6}
-                                        sx={{
-                                            padding: 3,
-                                            textAlign: 'center',
-                                            cursor: 'pointer',
-                                            backgroundColor: '#FFFFFF',
-                                            borderRadius: 2,
-                                            boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)',
-                                            '&:hover': {
-                                                backgroundColor: '#E8F5E9',
-                                                transform: 'scale(1.05)',
-                                                transition: 'all 0.3s ease-in-out',
-                                            },
-                                        }}
-                                        onClick={() => navigate(module.path)}
-                                    >
-                                        <Typography
-                                            variant="h6"
+                <Grid container spacing={2}>
+                    {categories.flatMap((category) =>
+                        category.modules.map((module) => (
+                            <Grid item xs={6} sm={4} md={3} key={module.name}>
+                                <Card
+                                    sx={{
+                                        borderRadius: 1,
+                                        boxShadow: '0px 2px 5px rgba(0, 0, 0, 0.1)',
+                                        '&:hover': {
+                                            transform: 'scale(1.03)',
+                                            transition: 'all 0.2s ease-in-out',
+                                        },
+                                    }}
+                                >
+                                    <CardActionArea onClick={() => navigate(module.path)}>
+                                        <CardMedia
                                             sx={{
-                                                fontWeight: 'bold',
-                                                color: '#1B5E20',
+                                                height: 80,
+                                                backgroundColor: '#E8F5E9',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
                                             }}
                                         >
-                                            {module.name}
-                                        </Typography>
-                                    </Paper>
-                                </Grid>
-                            ))}
-                        </Grid>
-                    </Box>
-                ))}
+                                            {module.icon}
+                                        </CardMedia>
+                                        <CardContent>
+                                            <Typography
+                                                variant="body2"
+                                                sx={{
+                                                    fontWeight: 'bold',
+                                                    textAlign: 'center',
+                                                    color: '#1B5E20',
+                                                }}
+                                            >
+                                                {module.name}
+                                            </Typography>
+                                        </CardContent>
+                                    </CardActionArea>
+                                </Card>
+                            </Grid>
+                        ))
+                    )}
+                </Grid>
             </Box>
         </Box>
     );
