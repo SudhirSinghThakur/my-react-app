@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
     Box,
     Typography,
@@ -16,6 +16,7 @@ import {
     DialogActions,
     TextField,
     CircularProgress,
+    TablePagination,
 } from '@mui/material';
 import config from '../../config'; // Import the config file
 
@@ -61,6 +62,9 @@ const Enrollment: React.FC = () => {
         religion: '',
         class: '',
     });
+    const [searchTerm, setSearchTerm] = useState('');
+    const [page, setPage] = useState(0); // Current page
+    const [rowsPerPage, setRowsPerPage] = useState(5); // Rows per page
 
     // Fetch enrolled students
     const fetchStudents = async () => {
@@ -181,6 +185,32 @@ const Enrollment: React.FC = () => {
             event.target.value = ''; // Reset file input field
         }
     };
+
+    // Handle pagination changes
+    const handleChangePage = (event: unknown, newPage: number) => {
+        setPage(newPage);
+    };
+
+    const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setRowsPerPage(parseInt(event.target.value, 10));
+        setPage(0); // Reset to the first page
+    };
+
+    // Filtered students based on search term
+    const filteredStudents = useMemo(
+        () =>
+            students.filter((student) =>
+                student.studentName.toLowerCase().includes(searchTerm.toLowerCase())
+            ),
+        [students, searchTerm]
+    );
+
+    // Paginated students
+    const paginatedStudents = useMemo(
+        () =>
+            filteredStudents.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
+        [filteredStudents, page, rowsPerPage]
+    );
 
     // Fetch students on component mount
     useEffect(() => {
@@ -388,46 +418,61 @@ const Enrollment: React.FC = () => {
                 </DialogActions>
             </Dialog>
 
-            {/* List of Enrolled Students */}
-            <Paper elevation={3} sx={{ padding: 4, marginTop: 3 }}>
-                <Typography variant="h5" sx={{ fontWeight: 'bold', color: '#2E7D32', marginBottom: 2 }}>
-                    Enrolled Students
-                </Typography>
-                <TableContainer component={Paper}>
-                    <Table>
-                        <TableHead>
-                            <TableRow>
-                                <TableCell>ID</TableCell>
-                                <TableCell>Name</TableCell>
-                                <TableCell>Date of Birth</TableCell>
-                                <TableCell>Father's Name</TableCell>
-                                <TableCell>Mother's Name</TableCell>
-                                <TableCell>Class</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {students.length > 0 ? (
-                                students.map((student) => (
-                                    <TableRow key={student.id}>
-                                        <TableCell>{student.id}</TableCell>
-                                        <TableCell>{student.studentName}</TableCell>
-                                        <TableCell>{student.dateOfBirth}</TableCell>
-                                        <TableCell>{student.fatherName}</TableCell>
-                                        <TableCell>{student.motherName}</TableCell>
-                                        <TableCell>{student.class}</TableCell>
-                                    </TableRow>
-                                ))
-                            ) : (
-                                <TableRow>
-                                    <TableCell colSpan={6} align="center">
-                                        No students found.
-                                    </TableCell>
+            {/* Search Bar */}
+            <TextField
+                label="Search Students"
+                variant="outlined"
+                fullWidth
+                sx={{ marginBottom: 3 }}
+                onChange={(e) => setSearchTerm(e.target.value)}
+            />
+
+            {/* Student Table */}
+            <TableContainer component={Paper}>
+                <Table>
+                    <TableHead>
+                        <TableRow>
+                            <TableCell>ID</TableCell>
+                            <TableCell>Name</TableCell>
+                            <TableCell>Date of Birth</TableCell>
+                            <TableCell>Father's Name</TableCell>
+                            <TableCell>Mother's Name</TableCell>
+                            <TableCell>Class</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {paginatedStudents.length > 0 ? (
+                            paginatedStudents.map((student) => (
+                                <TableRow key={student.id}>
+                                    <TableCell>{student.id}</TableCell>
+                                    <TableCell>{student.studentName}</TableCell>
+                                    <TableCell>{student.dateOfBirth}</TableCell>
+                                    <TableCell>{student.fatherName}</TableCell>
+                                    <TableCell>{student.motherName}</TableCell>
+                                    <TableCell>{student.class}</TableCell>
                                 </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
-            </Paper>
+                            ))
+                        ) : (
+                            <TableRow>
+                                <TableCell colSpan={6} align="center">
+                                    No students found.
+                                </TableCell>
+                            </TableRow>
+                        )}
+                    </TableBody>
+                </Table>
+            </TableContainer>
+
+            {/* Pagination */}
+            <TablePagination
+                component="div"
+                count={filteredStudents.length}
+                page={page}
+                onPageChange={handleChangePage}
+                rowsPerPage={rowsPerPage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+                rowsPerPageOptions={[5, 10, 25]}
+            />
         </Box>
     );
 };
