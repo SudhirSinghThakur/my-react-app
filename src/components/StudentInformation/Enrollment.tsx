@@ -17,7 +17,15 @@ import {
     TextField,
     CircularProgress,
     TablePagination,
+    Grid,
+    Select,
+    MenuItem,
+    FormControl,
+    InputLabel,
 } from '@mui/material';
+import UploadFileIcon from '@mui/icons-material/UploadFile';
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import SearchIcon from '@mui/icons-material/Search';
 import config from '../../config'; // Import the config file
 
 interface Student {
@@ -63,6 +71,7 @@ const Enrollment: React.FC = () => {
         class: '',
     });
     const [searchTerm, setSearchTerm] = useState('');
+    const [selectedClass, setSelectedClass] = useState(''); // Selected class for filtering
     const [page, setPage] = useState(0); // Current page
     const [rowsPerPage, setRowsPerPage] = useState(5); // Rows per page
 
@@ -95,97 +104,6 @@ const Enrollment: React.FC = () => {
         setFormData({ ...formData, [name]: value });
     };
 
-    // Handle form submission
-    const handleSubmit = async () => {
-        if (
-            formData.studentName &&
-            formData.dateOfBirth &&
-            formData.fatherName &&
-            formData.motherName &&
-            formData.class
-        ) {
-            setLoading(true);
-            try {
-                const response = await fetch(`${config.BASE_URL}/Students`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Authorization: `Bearer ${localStorage.getItem('token')}`,
-                    },
-                    body: JSON.stringify(formData),
-                });
-
-                if (response.ok) {
-                    alert('Student added successfully!');
-                    fetchStudents(); // Refresh the student list
-                    setOpenAdd(false); // Close the dialog
-                    setFormData({
-                        studentName: '',
-                        dateOfBirth: '',
-                        fatherName: '',
-                        motherName: '',
-                        fatherOccupation: '',
-                        motherOccupation: '',
-                        fatherQualification: '',
-                        motherQualification: '',
-                        addressResidential: '',
-                        addressOffice: '',
-                        phoneResidential: '',
-                        phoneOffice: '',
-                        guardianName: '',
-                        nationality: '',
-                        religion: '',
-                        class: '',
-                    });
-                } else {
-                    console.error('Failed to add student');
-                    alert('Failed to add student. Please try again.');
-                }
-            } catch (error) {
-                console.error('Error adding student:', error);
-                alert('An error occurred while adding the student.');
-            } finally {
-                setLoading(false);
-            }
-        } else {
-            alert('Please fill in all required fields.');
-        }
-    };
-
-    // Handle file upload
-    const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
-        if (!file) return;
-
-        const formData = new FormData();
-        formData.append('file', file);
-
-        setLoading(true);
-        try {
-            const response = await fetch(`${config.BASE_URL}/Students/upload`, {
-                method: 'POST',
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem('token')}`,
-                },
-                body: formData,
-            });
-
-            if (response.ok) {
-                alert('File uploaded successfully!');
-                fetchStudents(); // Fetch the updated list of students
-            } else {
-                console.error('Failed to upload file');
-                alert('Failed to upload file. Please check the file format.');
-            }
-        } catch (error) {
-            console.error('Error uploading file:', error);
-            alert('An error occurred while uploading the file.');
-        } finally {
-            setLoading(false);
-            event.target.value = ''; // Reset file input field
-        }
-    };
-
     // Handle pagination changes
     const handleChangePage = (event: unknown, newPage: number) => {
         setPage(newPage);
@@ -196,14 +114,18 @@ const Enrollment: React.FC = () => {
         setPage(0); // Reset to the first page
     };
 
-    // Filtered students based on search term
-    const filteredStudents = useMemo(
-        () =>
-            students.filter((student) =>
-                student.studentName.toLowerCase().includes(searchTerm.toLowerCase())
-            ),
-        [students, searchTerm]
-    );
+    // Filtered students based on search term and selected class
+    const filteredStudents = useMemo(() => {
+        return students.filter((student) => {
+            const matchesSearch = student.studentName
+                .toLowerCase()
+                .includes(searchTerm.toLowerCase());
+            const matchesClass = selectedClass
+                ? student.class === selectedClass
+                : true; // If no class is selected, show all
+            return matchesSearch && matchesClass;
+        });
+    }, [students, searchTerm, selectedClass]);
 
     // Paginated students
     const paginatedStudents = useMemo(
@@ -212,51 +134,56 @@ const Enrollment: React.FC = () => {
         [filteredStudents, page, rowsPerPage]
     );
 
-    // Fetch students on component mount
     useEffect(() => {
         fetchStudents();
     }, []);
 
     return (
         <Box sx={{ padding: 3 }}>
-            <Paper elevation={3} sx={{ padding: 4, textAlign: 'center', marginBottom: 3 }}>
+            {/* Header Section */}
+            <Paper
+                elevation={3}
+                sx={{
+                    padding: 4,
+                    textAlign: 'center',
+                    marginBottom: 3,
+                    backgroundColor: '#E8F5E9',
+                    borderRadius: 2,
+                }}
+            >
                 <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#2E7D32' }}>
                     Student Enrollment
                 </Typography>
-                <Typography variant="body1" sx={{ marginTop: 2 }}>
+                <Typography variant="body1" sx={{ marginTop: 2, color: '#616161' }}>
                     Manage student profiles and enrollment details.
                 </Typography>
-                <Button
-                    variant="contained"
-                    sx={{
-                        marginTop: 3,
-                        backgroundColor: '#2E7D32',
-                        color: '#FFFFFF',
-                        '&:hover': { backgroundColor: '#1B5E20' },
-                    }}
-                    onClick={() => setOpenAdd(true)}
-                >
-                    Add New Student
-                </Button>
-                <Button
-                    variant="contained"
-                    component="label"
-                    sx={{
-                        marginTop: 3,
-                        marginLeft: 2,
-                        backgroundColor: '#FFC107',
-                        color: '#2E7D32',
-                        '&:hover': { backgroundColor: '#FFB300' },
-                    }}
-                >
-                    Bulk Upload
-                    <input
-                        type="file"
-                        accept=".csv, .xlsx"
-                        hidden
-                        onChange={handleFileUpload}
-                    />
-                </Button>
+                <Box sx={{ marginTop: 3, display: 'flex', justifyContent: 'center', gap: 2 }}>
+                    <Button
+                        variant="contained"
+                        startIcon={<AddCircleOutlineIcon />}
+                        sx={{
+                            backgroundColor: '#2E7D32',
+                            color: '#FFFFFF',
+                            '&:hover': { backgroundColor: '#1B5E20' },
+                        }}
+                        onClick={() => setOpenAdd(true)}
+                    >
+                        Add New Student
+                    </Button>
+                    <Button
+                        variant="contained"
+                        startIcon={<UploadFileIcon />}
+                        component="label"
+                        sx={{
+                            backgroundColor: '#FFC107',
+                            color: '#2E7D32',
+                            '&:hover': { backgroundColor: '#FFB300' },
+                        }}
+                    >
+                        Bulk Upload
+                        <input type="file" accept=".csv, .xlsx" hidden />
+                    </Button>
+                </Box>
             </Paper>
 
             {loading && (
@@ -265,179 +192,61 @@ const Enrollment: React.FC = () => {
                 </Box>
             )}
 
-            {/* Add New Student Dialog */}
-            <Dialog open={openAdd} onClose={() => setOpenAdd(false)} fullWidth maxWidth="md">
-                <DialogTitle>Add New Student</DialogTitle>
-                <DialogContent>
-                    <TextField
-                        label="Name"
-                        name="studentName"
-                        fullWidth
-                        sx={{ marginBottom: 2 }}
-                        value={formData.studentName}
-                        onChange={handleChange}
-                    />
-                    <TextField
-                        label="Date of Birth"
-                        name="dateOfBirth"
-                        type="date"
-                        fullWidth
-                        sx={{ marginBottom: 2 }}
-                        InputLabelProps={{ shrink: true }}
-                        value={formData.dateOfBirth}
-                        onChange={handleChange}
-                    />
-                    <TextField
-                        label="Father's Name"
-                        name="fatherName"
-                        fullWidth
-                        sx={{ marginBottom: 2 }}
-                        value={formData.fatherName}
-                        onChange={handleChange}
-                    />
-                    <TextField
-                        label="Mother's Name"
-                        name="motherName"
-                        fullWidth
-                        sx={{ marginBottom: 2 }}
-                        value={formData.motherName}
-                        onChange={handleChange}
-                    />
-                    <TextField
-                        label="Father's Occupation"
-                        name="fatherOccupation"
-                        fullWidth
-                        sx={{ marginBottom: 2 }}
-                        value={formData.fatherOccupation}
-                        onChange={handleChange}
-                    />
-                    <TextField
-                        label="Mother's Occupation"
-                        name="motherOccupation"
-                        fullWidth
-                        sx={{ marginBottom: 2 }}
-                        value={formData.motherOccupation}
-                        onChange={handleChange}
-                    />
-                    <TextField
-                        label="Father's Qualification"
-                        name="fatherQualification"
-                        fullWidth
-                        sx={{ marginBottom: 2 }}
-                        value={formData.fatherQualification}
-                        onChange={handleChange}
-                    />
-                    <TextField
-                        label="Mother's Qualification"
-                        name="motherQualification"
-                        fullWidth
-                        sx={{ marginBottom: 2 }}
-                        value={formData.motherQualification}
-                        onChange={handleChange}
-                    />
-                    <TextField
-                        label="Residential Address"
-                        name="addressResidential"
-                        fullWidth
-                        sx={{ marginBottom: 2 }}
-                        value={formData.addressResidential}
-                        onChange={handleChange}
-                    />
-                    <TextField
-                        label="Office Address"
-                        name="addressOffice"
-                        fullWidth
-                        sx={{ marginBottom: 2 }}
-                        value={formData.addressOffice}
-                        onChange={handleChange}
-                    />
-                    <TextField
-                        label="Residential Phone"
-                        name="phoneResidential"
-                        fullWidth
-                        sx={{ marginBottom: 2 }}
-                        value={formData.phoneResidential}
-                        onChange={handleChange}
-                    />
-                    <TextField
-                        label="Office Phone"
-                        name="phoneOffice"
-                        fullWidth
-                        sx={{ marginBottom: 2 }}
-                        value={formData.phoneOffice}
-                        onChange={handleChange}
-                    />
-                    <TextField
-                        label="Guardian's Name"
-                        name="guardianName"
-                        fullWidth
-                        sx={{ marginBottom: 2 }}
-                        value={formData.guardianName}
-                        onChange={handleChange}
-                    />
-                    <TextField
-                        label="Nationality"
-                        name="nationality"
-                        fullWidth
-                        sx={{ marginBottom: 2 }}
-                        value={formData.nationality}
-                        onChange={handleChange}
-                    />
-                    <TextField
-                        label="Religion"
-                        name="religion"
-                        fullWidth
-                        sx={{ marginBottom: 2 }}
-                        value={formData.religion}
-                        onChange={handleChange}
-                    />
-                    <TextField
-                        label="Class for Admission"
-                        name="admissionClass"
-                        fullWidth
-                        sx={{ marginBottom: 2 }}
-                        value={formData.class}
-                        onChange={handleChange}
-                    />
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setOpenAdd(false)} color="secondary">
-                        Cancel
-                    </Button>
-                    <Button
-                        variant="contained"
-                        sx={{
-                            backgroundColor: '#2E7D32',
-                            color: '#FFFFFF',
-                            '&:hover': { backgroundColor: '#1B5E20' },
-                        }}
-                        onClick={handleSubmit}
-                    >
-                        Submit
-                    </Button>
-                </DialogActions>
-            </Dialog>
+            {/* Filters Section */}
+            <Box sx={{ display: 'flex', gap: 2, marginBottom: 3 }}>
+                {/* Search Bar */}
+                <TextField
+                    label="Search Students"
+                    variant="outlined"
+                    fullWidth
+                    placeholder="Search by name"
+                    InputProps={{
+                        startAdornment: <SearchIcon sx={{ marginRight: 1, color: '#616161' }} />,
+                    }}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                />
 
-            {/* Search Bar */}
-            <TextField
-                label="Search Students"
-                variant="outlined"
-                fullWidth
-                sx={{ marginBottom: 3 }}
-                onChange={(e) => setSearchTerm(e.target.value)}
-            />
+                {/* Class Filter Dropdown */}
+                <FormControl fullWidth>
+                    <InputLabel>Filter by Class</InputLabel>
+                    <Select
+                        value={selectedClass}
+                        onChange={(e) => setSelectedClass(e.target.value)}
+                        label="Filter by Class"
+                    >
+                        <MenuItem value="">All Classes</MenuItem>
+                        <MenuItem value="Nursery">Nursery</MenuItem>
+                        <MenuItem value="KG - I">LKG</MenuItem>
+                        <MenuItem value="KG - II">UKG</MenuItem>
+                        <MenuItem value="1st">Class 1</MenuItem>
+                        <MenuItem value="2nd">Class 2</MenuItem>
+                        <MenuItem value="3rd">Class 3</MenuItem>
+                        <MenuItem value="4th">Class 4</MenuItem>
+                        <MenuItem value="5th">Class 5</MenuItem>
+                        <MenuItem value="6th">Class 6</MenuItem>
+                        <MenuItem value="7th">Class 7</MenuItem>
+                        <MenuItem value="8th">Class 8</MenuItem>
+                    </Select>
+                </FormControl>
+            </Box>
 
             {/* Student Table */}
-            <TableContainer component={Paper}>
+            <TableContainer component={Paper} sx={{ borderRadius: 2 }}>
                 <Table>
                     <TableHead>
                         <TableRow>
-                            <TableCell>ID</TableCell>
-                            <TableCell>Name</TableCell>
-                            <TableCell>Date of Birth</TableCell>
-                            <TableCell>Father's Name</TableCell>
-                            <TableCell>Mother's Name</TableCell>
-                            <TableCell>Class</TableCell>
+                            <TableCell sx={{ fontWeight: 'bold', color: '#2E7D32' }}>ID</TableCell>
+                            <TableCell sx={{ fontWeight: 'bold', color: '#2E7D32' }}>Name</TableCell>
+                            <TableCell sx={{ fontWeight: 'bold', color: '#2E7D32' }}>
+                                Date of Birth
+                            </TableCell>
+                            <TableCell sx={{ fontWeight: 'bold', color: '#2E7D32' }}>
+                                Father's Name
+                            </TableCell>
+                            <TableCell sx={{ fontWeight: 'bold', color: '#2E7D32' }}>
+                                Mother's Name
+                            </TableCell>
+                            <TableCell sx={{ fontWeight: 'bold', color: '#2E7D32' }}>Class</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -473,6 +282,46 @@ const Enrollment: React.FC = () => {
                 onRowsPerPageChange={handleChangeRowsPerPage}
                 rowsPerPageOptions={[5, 10, 25]}
             />
+
+            {/* Add New Student Dialog */}
+            <Dialog open={openAdd} onClose={() => setOpenAdd(false)} fullWidth maxWidth="lg">
+                <DialogTitle sx={{ textAlign: 'center', fontWeight: 'bold', color: '#2E7D32' }}>
+                    Add New Student
+                </DialogTitle>
+                <DialogContent>
+                    <Grid container spacing={2}>
+                        {Object.keys(formData).map((key) => (
+                            <Grid item xs={12} sm={6} key={key}>
+                                <TextField
+                                    label={key
+                                        .replace(/([A-Z])/g, ' $1')
+                                        .replace(/^./, (str) => str.toUpperCase())}
+                                    name={key}
+                                    fullWidth
+                                    value={(formData as any)[key]}
+                                    onChange={handleChange}
+                                />
+                            </Grid>
+                        ))}
+                    </Grid>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setOpenAdd(false)} color="secondary">
+                        Cancel
+                    </Button>
+                    <Button
+                        variant="contained"
+                        sx={{
+                            backgroundColor: '#2E7D32',
+                            color: '#FFFFFF',
+                            '&:hover': { backgroundColor: '#1B5E20' },
+                        }}
+                        onClick={() => {}}
+                    >
+                        Submit
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Box>
     );
 };
