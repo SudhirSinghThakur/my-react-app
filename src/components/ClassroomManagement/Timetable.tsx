@@ -15,6 +15,10 @@ import {
     InputLabel,
     Button,
     TextField,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
 } from '@mui/material';
 
 interface TimetableEntry {
@@ -26,6 +30,11 @@ interface TimetableEntry {
     time: string;
 }
 
+interface Student {
+    id: number;
+    name: string;
+}
+
 const Timetable: React.FC = () => {
     const [grade, setGrade] = useState<string>('Nursery');
     const [timetable, setTimetable] = useState<TimetableEntry[]>([
@@ -34,6 +43,8 @@ const Timetable: React.FC = () => {
         { id: 3, grade: 'Class 1', day: 'Tuesday', date: '2025-04-08', subject: 'English', time: '9:00 AM - 10:00 AM' },
     ]);
     const [newEntry, setNewEntry] = useState({ day: '', date: '', subject: '', time: '' });
+    const [students, setStudents] = useState<Student[]>([]);
+    const [openPrintDialog, setOpenPrintDialog] = useState(false);
 
     const handleAddEntry = () => {
         if (newEntry.day && newEntry.date && newEntry.subject && newEntry.time) {
@@ -42,6 +53,88 @@ const Timetable: React.FC = () => {
                 { id: timetable.length + 1, grade, ...newEntry },
             ]);
             setNewEntry({ day: '', date: '', subject: '', time: '' });
+        }
+    };
+
+    // Fetch students for the selected class
+    const fetchStudents = async (className: string) => {
+        // Simulate fetching students from an API
+        const mockStudents = [
+            { id: 1, name: 'John Doe' },
+            { id: 2, name: 'Jane Smith' },
+            { id: 3, name: 'Alice Johnson' },
+            { id: 4, name: 'Bob Brown' },
+            { id: 5, name: 'Charlie Davis' },
+            { id: 6, name: 'Diana Evans' },
+            { id: 7, name: 'Ethan Harris' },
+            { id: 8, name: 'Fiona Green' },
+        ];
+        setStudents(mockStudents.filter((student) => student.id <= 8)); // Filter by class if needed
+    };
+
+    // Handle printing admit cards
+    const handlePrintAdmitCards = () => {
+        const printWindow = window.open('', '_blank');
+        if (printWindow) {
+            printWindow.document.write(`
+                <html>
+                    <head>
+                        <title>Admit Cards</title>
+                        <style>
+                            body {
+                                font-family: Arial, sans-serif;
+                                margin: 0;
+                                padding: 0;
+                            }
+                            .admit-card-container {
+                                display: flex;
+                                flex-wrap: wrap;
+                                justify-content: space-between;
+                                padding: 20px;
+                                page-break-inside: avoid;
+                            }
+                            .admit-card {
+                                width: 48%;
+                                border: 1px solid #ccc;
+                                border-radius: 8px;
+                                padding: 10px;
+                                margin-bottom: 20px;
+                                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+                                text-align: center;
+                                page-break-inside: avoid;
+                            }
+                            .admit-card h3 {
+                                margin: 10px 0;
+                                color: #2E7D32;
+                            }
+                            .admit-card p {
+                                margin: 5px 0;
+                                font-size: 14px;
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="admit-card-container">
+                            ${students
+                                .map(
+                                    (student) => `
+                                    <div class="admit-card">
+                                        <h3>Admit Card</h3>
+                                        <p><strong>Student Name:</strong> ${student.name}</p>
+                                        <p><strong>Class:</strong> ${grade}</p>
+                                        <p><strong>Roll No:</strong> ${student.id}</p>
+                                        <p><strong>Exam Date:</strong> 2025-04-10</p>
+                                        <p><strong>Exam Time:</strong> 9:00 AM - 12:00 PM</p>
+                                    </div>
+                                `
+                                )
+                                .join('')}
+                        </div>
+                    </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.print();
         }
     };
 
@@ -78,6 +171,20 @@ const Timetable: React.FC = () => {
                         <MenuItem value="Class 8">Class 8</MenuItem>
                     </Select>
                 </FormControl>
+                <Button
+                    variant="contained"
+                    sx={{
+                        backgroundColor: '#2E7D32',
+                        color: '#FFFFFF',
+                        '&:hover': { backgroundColor: '#1B5E20' },
+                    }}
+                    onClick={() => {
+                        fetchStudents(grade);
+                        setOpenPrintDialog(true);
+                    }}
+                >
+                    Print Admit Cards
+                </Button>
             </Box>
 
             {/* Add New Timetable Entry */}
@@ -150,6 +257,38 @@ const Timetable: React.FC = () => {
                     </TableBody>
                 </Table>
             </TableContainer>
+
+            {/* Print Admit Cards Dialog */}
+            <Dialog open={openPrintDialog} onClose={() => setOpenPrintDialog(false)} fullWidth>
+                <DialogTitle>Confirm Print Admit Cards</DialogTitle>
+                <DialogContent>
+                    <Typography variant="body1" sx={{ marginBottom: 2 }}>
+                        You are about to print admit cards for the class <strong>{grade}</strong>.
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: '#616161' }}>
+                        Each page will contain up to 6 admit cards.
+                    </Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setOpenPrintDialog(false)} color="secondary">
+                        Cancel
+                    </Button>
+                    <Button
+                        variant="contained"
+                        sx={{
+                            backgroundColor: '#2E7D32',
+                            color: '#FFFFFF',
+                            '&:hover': { backgroundColor: '#1B5E20' },
+                        }}
+                        onClick={() => {
+                            handlePrintAdmitCards();
+                            setOpenPrintDialog(false);
+                        }}
+                    >
+                        Print
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Box>
     );
 };
