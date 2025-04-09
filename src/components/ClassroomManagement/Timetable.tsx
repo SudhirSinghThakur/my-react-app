@@ -1,180 +1,179 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Box,
     Typography,
     Paper,
     Button,
-    Select,
-    MenuItem,
-    FormControl,
-    InputLabel,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
-    TextField,
     Table,
     TableBody,
     TableCell,
     TableContainer,
     TableHead,
     TableRow,
-    Tabs,
-    Tab,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    TextField,
+    FormControl,
+    InputLabel,
+    Select,
+    MenuItem,
+    IconButton,
 } from '@mui/material';
-
-interface Student {
-    id: number;
-    name: string;
-    fatherName: string;
-}
-
-interface TimetableEntry {
-    date: string;
-    subject: string;
-}
+import { AddCircle, RemoveCircle } from '@mui/icons-material';
+import config from '../../config'; // Import the config file
 
 interface ExamEntry {
     id: number;
     grade: string;
+    examType: string;
     subject: string;
     date: string;
 }
 
+interface TimetableRow {
+    date: string;
+    subject: string;
+}
+
 const Timetable: React.FC = () => {
-    const [tabIndex, setTabIndex] = useState(0); // Tab index for switching between Class and Exam Timetable
-    const [grade, setGrade] = useState<string>('Nursery');
-    const [students, setStudents] = useState<Student[]>([]);
-    const [timetable, setTimetable] = useState<TimetableEntry[]>([
-        { date: '12/03/2024', subject: 'Math' },
-        { date: '14/03/2024', subject: 'Science' },
-        { date: '16/03/2024', subject: 'English' },
-        { date: '19/03/2024', subject: 'Social Studies' },
-    ]);
-    const [exams, setExams] = useState<ExamEntry[]>([
-        { id: 1, grade: 'Nursery', subject: 'Math', date: '2025-04-10' },
-        { id: 2, grade: 'Class 1', subject: 'Science', date: '2025-04-12' },
-    ]);
-    const [newExam, setNewExam] = useState({ grade: '', subject: '', date: '' });
-    const [openPrintDialog, setOpenPrintDialog] = useState(false);
+    const [exams, setExams] = useState<ExamEntry[]>([]); // Exam timetable data
+    const [openAddDialog, setOpenAddDialog] = useState(false); // Add dialog state
+    const [openEditDialog, setOpenEditDialog] = useState(false); // Edit dialog state
+    const [grade, setGrade] = useState<string>(''); // Selected grade
+    const [examType, setExamType] = useState<string>(''); // Selected exam type
+    const [rows, setRows] = useState<TimetableRow[]>([{ date: '', subject: '' }]); // Dynamic rows
+    const [editExam, setEditExam] = useState<ExamEntry | null>(null); // Exam to edit
 
-    // Fetch students for the selected class
-    const fetchStudents = async (className: string) => {
-        // Simulate fetching students from an API
-        const mockStudents = [
-            { id: 1, name: 'John Doe', fatherName: 'Robert Doe' },
-            { id: 2, name: 'Jane Smith', fatherName: 'Michael Smith' },
-            { id: 3, name: 'Alice Johnson', fatherName: 'David Johnson' },
-            { id: 4, name: 'Bob Brown', fatherName: 'James Brown' },
-        ];
-        setStudents(mockStudents);
-    };
-
-    // Handle printing admit cards
-    const handlePrintAdmitCards = () => {
-        const printWindow = window.open('', '_blank');
-        if (printWindow) {
-            printWindow.document.write(`
-                <html>
-                    <head>
-                        <title>Admit Cards</title>
-                        <style>
-                            body {
-                                font-family: Arial, sans-serif;
-                                margin: 0;
-                                padding: 0;
-                            }
-                            .page {
-                                width: 100%;
-                                height: 100%;
-                                display: grid;
-                                grid-template-columns: 1fr 1fr; /* Two cards per row */
-                                grid-gap: 10px; /* Space between cards */
-                                padding: 20px;
-                                box-sizing: border-box;
-                                page-break-after: always;
-                            }
-                            .admit-card {
-                                width: 100%;
-                                border: 1px solid #000;
-                                border-radius: 8px;
-                                padding: 10px;
-                                box-sizing: border-box;
-                                text-align: left;
-                                height: 48%; /* Adjust height to fit 4 cards per page */
-                                display: flex;
-                                flex-direction: column;
-                                justify-content: space-between;
-                                overflow: hidden; /* Prevent content overflow */
-                            }
-                            .admit-card h3 {
-                                margin: 0;
-                                text-align: center;
-                                font-size: 14px;
-                                font-weight: bold;
-                            }
-                            .admit-card p {
-                                margin: 5px 0;
-                                font-size: 12px;
-                                word-wrap: break-word; /* Ensure long text wraps */
-                            }
-                            .admit-card .timetable {
-                                margin-top: 10px;
-                                border-top: 1px solid #000;
-                                padding-top: 10px;
-                            }
-                            .admit-card .signature {
-                                margin-top: 20px;
-                                display: flex;
-                                justify-content: space-between;
-                                font-size: 10px;
-                            }
-                        </style>
-                    </head>
-                    <body>
-                        <div class="page">
-                            ${students
-                                .map(
-                                    (student) => `
-                                    <div class="admit-card">
-                                        <h3>DADA VIKRAM PUBLIC SCHOOL</h3>
-                                        <p><strong>Class:</strong> ${grade}</p>
-                                        <p><strong>Student Name:</strong> ${student.name}</p>
-                                        <p><strong>Father's Name:</strong> ${student.fatherName}</p>
-                                        <p><strong>Roll No:</strong> ${student.id}</p>
-                                        <div class="timetable">
-                                            <h4>Timetable:</h4>
-                                            ${timetable
-                                                .map(
-                                                    (entry) =>
-                                                        `<p>${entry.date} - ${entry.subject}</p>`
-                                                )
-                                                .join('')}
-                                        </div>
-                                        <div class="signature">
-                                            <p>Examiner Sign</p>
-                                            <p>Principal Sign</p>
-                                        </div>
-                                    </div>
-                                `
-                                )
-                                .join('')}
-                        </div>
-                    </body>
-                </html>
-            `);
-            printWindow.document.close();
-            printWindow.print();
+    // Fetch Exam Timetable (GET)
+    const fetchExamTimetable = async () => {
+        try {
+            const response = await fetch(`${config.BASE_URL}/ExamSchedule`, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('token')}`,
+                },
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setExams(data);
+            } else {
+                console.error('Failed to fetch exam timetable');
+            }
+        } catch (error) {
+            console.error('Error fetching exam timetable:', error);
         }
     };
 
-    // Add a new exam
-    const handleAddExam = () => {
-        if (newExam.grade && newExam.subject && newExam.date) {
-            setExams([...exams, { id: exams.length + 1, ...newExam }]);
-            setNewExam({ grade: '', subject: '', date: '' });
+    // Add a New Exam Timetable (POST)
+    const handleSubmit = async () => {
+        if (grade && examType && rows.every((row) => row.date && row.subject)) {
+            const payload = {
+                grade,
+                examType,
+                timetable: rows,
+            };
+
+            try {
+                const response = await fetch(`${config.BASE_URL}/ExamSchedule`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${localStorage.getItem('token')}`,
+                    },
+                    body: JSON.stringify(payload),
+                });
+
+                console.log('Payload:', payload);
+                console.log('API Response:', response);
+
+                if (response.ok) {
+                    alert('Exam timetable added successfully!');
+                    setGrade('');
+                    setExamType('');
+                    setRows([{ date: '', subject: '' }]); // Reset the form
+                    setOpenAddDialog(false); // Close the dialog
+                    fetchExamTimetable(); // Refresh the timetable
+                } else {
+                    alert('Failed to add exam timetable.');
+                }
+            } catch (error) {
+                console.error('Error adding exam timetable:', error);
+            }
+        } else {
+            alert('Please fill out all fields.');
         }
     };
+ 
+    // Edit an Existing Exam Timetable (PUT)
+    const handleEditExam = async () => {
+        if (editExam) {
+            try {
+                const response = await fetch(`${config.BASE_URL}/ExamSchedule/${editExam.id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${localStorage.getItem('token')}`,
+                    },
+                    body: JSON.stringify(editExam),
+                });
+
+                if (response.ok) {
+                    alert('Exam timetable updated successfully!');
+                    setOpenEditDialog(false); // Close the dialog
+                    setEditExam(null); // Reset the edit state
+                    fetchExamTimetable(); // Refresh the timetable
+                } else {
+                    alert('Failed to update exam timetable.');
+                }
+            } catch (error) {
+                console.error('Error updating exam timetable:', error);
+            }
+        }
+    };
+
+    // Delete an Exam Timetable (DELETE)
+    const handleDeleteExam = async (id: number) => {
+        try {
+            const response = await fetch(`${config.BASE_URL}/ExamSchedule/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('token')}`,
+                },
+            });
+
+            if (response.ok) {
+                alert('Exam timetable deleted successfully!');
+                fetchExamTimetable(); // Refresh the timetable
+            } else {
+                alert('Failed to delete exam timetable.');
+            }
+        } catch (error) {
+            console.error('Error deleting exam timetable:', error);
+        }
+    };
+
+    // Handle adding a new row
+    const handleAddRow = () => {
+        setRows([...rows, { date: '', subject: '' }]);
+    };
+
+    // Handle removing a row
+    const handleRemoveRow = (index: number) => {
+        const updatedRows = rows.filter((_, i) => i !== index);
+        setRows(updatedRows);
+    };
+
+    // Handle updating a row
+    const handleRowChange = (index: number, field: keyof TimetableRow, value: string) => {
+        const updatedRows = [...rows];
+        updatedRows[index][field] = value;
+        setRows(updatedRows);
+    };
+
+    useEffect(() => {
+        fetchExamTimetable(); // Fetch exam timetable on component mount
+    }, []);
 
     return (
         <Box sx={{ padding: 3 }}>
@@ -183,152 +182,135 @@ const Timetable: React.FC = () => {
                     Timetable Management
                 </Typography>
                 <Typography variant="body1" sx={{ marginTop: 2 }}>
-                    Manage class schedules and exam timetables.
+                    Manage exam timetables for all grades.
                 </Typography>
             </Paper>
 
-            {/* Tabs for Class Timetable and Exam Timetable */}
-            <Tabs
-                value={tabIndex}
-                onChange={(e, newValue) => setTabIndex(newValue)}
-                sx={{ marginBottom: 3 }}
-            >
-                <Tab label="Class Timetable" />
-                <Tab label="Exam Timetable" />
-            </Tabs>
+            <Box sx={{ marginBottom: 3 }}>
+                <Button
+                    variant="contained"
+                    sx={{
+                        backgroundColor: '#2E7D32',
+                        color: '#FFFFFF',
+                        '&:hover': { backgroundColor: '#1B5E20' },
+                    }}
+                    onClick={() => setOpenAddDialog(true)}
+                >
+                    Add New Exam
+                </Button>
+            </Box>
+            <TableContainer component={Paper}>
+                <Table>
+                    <TableHead>
+                        <TableRow>
+                            <TableCell>ID</TableCell>
+                            <TableCell>Grade</TableCell>
+                            <TableCell>Subject</TableCell>
+                            <TableCell>Date</TableCell>
+                            <TableCell>Exam Type</TableCell>
+                            <TableCell>Actions</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {exams.map((exam) => (
+                            <TableRow key={exam.id}>
+                                <TableCell>{exam.id}</TableCell>
+                                <TableCell>{exam.grade}</TableCell>
+                                <TableCell>{exam.subject}</TableCell>
+                                <TableCell>{exam.date}</TableCell>
+                                <TableCell>{exam.examType}</TableCell>
+                                <TableCell>
+                                    <Button
+                                        variant="contained"
+                                        color="primary"
+                                        sx={{ marginRight: 1 }}
+                                        onClick={() => {
+                                            setEditExam(exam);
+                                            setOpenEditDialog(true);
+                                        }}
+                                    >
+                                        Edit
+                                    </Button>
+                                    <Button
+                                        variant="contained"
+                                        color="error"
+                                        onClick={() => handleDeleteExam(exam.id)}
+                                    >
+                                        Delete
+                                    </Button>
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </TableContainer>
 
-            {/* Class Timetable Tab */}
-            {tabIndex === 0 && (
-                <Box>
-                    <Box sx={{ marginBottom: 3 }}>
-                        <FormControl sx={{ marginRight: 2, minWidth: 150 }}>
-                            <InputLabel>Grade</InputLabel>
-                            <Select
-                                value={grade}
-                                onChange={(e) => setGrade(e.target.value)}
-                                label="Grade"
-                            >
-                                <MenuItem value="Nursery">Nursery</MenuItem>
-                                <MenuItem value="LKG">LKG</MenuItem>
-                                <MenuItem value="UKG">UKG</MenuItem>
-                                <MenuItem value="Class 1">Class 1</MenuItem>
-                                <MenuItem value="Class 2">Class 2</MenuItem>
-                                <MenuItem value="Class 3">Class 3</MenuItem>
-                                <MenuItem value="Class 4">Class 4</MenuItem>
-                                <MenuItem value="Class 5">Class 5</MenuItem>
-                                <MenuItem value="Class 6">Class 6</MenuItem>
-                                <MenuItem value="Class 7">Class 7</MenuItem>
-                                <MenuItem value="Class 8">Class 8</MenuItem>
-                            </Select>
-                        </FormControl>
-                        <Button
-                            variant="contained"
-                            sx={{
-                                backgroundColor: '#2E7D32',
-                                color: '#FFFFFF',
-                                '&:hover': { backgroundColor: '#1B5E20' },
-                            }}
-                            onClick={() => {
-                                fetchStudents(grade);
-                                setOpenPrintDialog(true);
-                            }}
-                        >
-                            Print Admit Cards
-                        </Button>
-                    </Box>
-                </Box>
-            )}
-
-            {/* Exam Timetable Tab */}
-            {tabIndex === 1 && (
-                <Box>
-                    <Box sx={{ marginBottom: 3 }}>
-                        <FormControl sx={{ marginRight: 2, minWidth: 150 }}>
-                            <InputLabel>Grade</InputLabel>
-                            <Select
-                                value={newExam.grade}
-                                onChange={(e) => setNewExam({ ...newExam, grade: e.target.value })}
-                                label="Grade"
-                            >
-                                <MenuItem value="Nursery">Nursery</MenuItem>
-                                <MenuItem value="LKG">LKG</MenuItem>
-                                <MenuItem value="UKG">UKG</MenuItem>
-                                <MenuItem value="Class 1">Class 1</MenuItem>
-                                <MenuItem value="Class 2">Class 2</MenuItem>
-                                <MenuItem value="Class 3">Class 3</MenuItem>
-                                <MenuItem value="Class 4">Class 4</MenuItem>
-                                <MenuItem value="Class 5">Class 5</MenuItem>
-                                <MenuItem value="Class 6">Class 6</MenuItem>
-                                <MenuItem value="Class 7">Class 7</MenuItem>
-                                <MenuItem value="Class 8">Class 8</MenuItem>
-                            </Select>
-                        </FormControl>
-                        <TextField
-                            label="Subject"
-                            variant="outlined"
-                            value={newExam.subject}
-                            onChange={(e) => setNewExam({ ...newExam, subject: e.target.value })}
-                            sx={{ marginRight: 2 }}
-                        />
-                        <TextField
-                            label="Date"
-                            type="date"
-                            variant="outlined"
-                            value={newExam.date}
-                            onChange={(e) => setNewExam({ ...newExam, date: e.target.value })}
-                            InputLabelProps={{ shrink: true }}
-                        />
-                        <Button
-                            variant="contained"
-                            sx={{
-                                marginLeft: 2,
-                                backgroundColor: '#2E7D32',
-                                color: '#FFFFFF',
-                                '&:hover': { backgroundColor: '#1B5E20' },
-                            }}
-                            onClick={handleAddExam}
-                        >
-                            Add Exam
-                        </Button>
-                    </Box>
-                    <TableContainer component={Paper}>
-                        <Table>
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell>ID</TableCell>
-                                    <TableCell>Grade</TableCell>
-                                    <TableCell>Subject</TableCell>
-                                    <TableCell>Date</TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {exams.map((exam) => (
-                                    <TableRow key={exam.id}>
-                                        <TableCell>{exam.id}</TableCell>
-                                        <TableCell>{exam.grade}</TableCell>
-                                        <TableCell>{exam.subject}</TableCell>
-                                        <TableCell>{exam.date}</TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
-                </Box>
-            )}
-
-            {/* Print Admit Cards Dialog */}
-            <Dialog open={openPrintDialog} onClose={() => setOpenPrintDialog(false)} fullWidth>
-                <DialogTitle>Confirm Print Admit Cards</DialogTitle>
+            {/* Add Exam Dialog */}
+            <Dialog open={openAddDialog} onClose={() => setOpenAddDialog(false)} fullWidth maxWidth="md">
+                <DialogTitle>Add New Exam Timetable</DialogTitle>
                 <DialogContent>
-                    <Typography variant="body1" sx={{ marginBottom: 2 }}>
-                        You are about to print admit cards for the class <strong>{grade}</strong>.
-                    </Typography>
-                    <Typography variant="body2" sx={{ color: '#616161' }}>
-                        Each page will contain up to 4 admit cards.
-                    </Typography>
+                    <FormControl fullWidth sx={{ marginBottom: 2 }}>
+                        <InputLabel>Grade</InputLabel>
+                        <Select
+                            value={grade}
+                            onChange={(e) => setGrade(e.target.value)}
+                        >
+                            <MenuItem value="Nursery">Nursery</MenuItem>
+                            <MenuItem value="Class 1">Class 1</MenuItem>
+                            <MenuItem value="Class 2">Class 2</MenuItem>
+                            <MenuItem value="Class 3">Class 3</MenuItem>
+                        </Select>
+                    </FormControl>
+
+                    <FormControl fullWidth sx={{ marginBottom: 2 }}>
+                        <InputLabel>Exam Type</InputLabel>
+                        <Select
+                            value={examType}
+                            onChange={(e) => setExamType(e.target.value)}
+                        >
+                            <MenuItem value="Quarterly">Quarterly</MenuItem>
+                            <MenuItem value="Half-Yearly">Half-Yearly</MenuItem>
+                            <MenuItem value="Annual">Annual</MenuItem>
+                        </Select>
+                    </FormControl>
+
+                    {rows.map((row, index) => (
+                        <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 2, marginBottom: 2 }}>
+                            <TextField
+                                label="Date"
+                                type="date"
+                                fullWidth
+                                InputLabelProps={{ shrink: true }}
+                                value={row.date}
+                                onChange={(e) => handleRowChange(index, 'date', e.target.value)}
+                            />
+                            <TextField
+                                label="Subject"
+                                fullWidth
+                                value={row.subject}
+                                onChange={(e) => handleRowChange(index, 'subject', e.target.value)}
+                            />
+                            <IconButton
+                                color="error"
+                                onClick={() => handleRemoveRow(index)}
+                                disabled={rows.length === 1}
+                            >
+                                <RemoveCircle />
+                            </IconButton>
+                        </Box>
+                    ))}
+
+                    <Button
+                        variant="outlined"
+                        startIcon={<AddCircle />}
+                        onClick={handleAddRow}
+                        sx={{ marginBottom: 3 }}
+                    >
+                        Add Row
+                    </Button>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={() => setOpenPrintDialog(false)} color="secondary">
+                    <Button onClick={() => setOpenAddDialog(false)} color="secondary">
                         Cancel
                     </Button>
                     <Button
@@ -338,12 +320,80 @@ const Timetable: React.FC = () => {
                             color: '#FFFFFF',
                             '&:hover': { backgroundColor: '#1B5E20' },
                         }}
-                        onClick={() => {
-                            handlePrintAdmitCards();
-                            setOpenPrintDialog(false);
-                        }}
+                        onClick={handleSubmit}
                     >
-                        Print
+                        Submit Timetable
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Edit Exam Dialog */}
+            <Dialog open={openEditDialog} onClose={() => setOpenEditDialog(false)} fullWidth maxWidth="md">
+                <DialogTitle>Edit Exam Timetable</DialogTitle>
+                <DialogContent>
+                    <FormControl fullWidth sx={{ marginBottom: 2 }}>
+                        <InputLabel>Grade</InputLabel>
+                        <Select
+                            value={editExam?.grade || ''}
+                            onChange={(e) =>
+                                setEditExam((prev) => (prev ? { ...prev, grade: e.target.value } : null))
+                            }
+                        >
+                            <MenuItem value="Nursery">Nursery</MenuItem>
+                            <MenuItem value="Class 1">Class 1</MenuItem>
+                            <MenuItem value="Class 2">Class 2</MenuItem>
+                            <MenuItem value="Class 3">Class 3</MenuItem>
+                        </Select>
+                    </FormControl>
+
+                    <FormControl fullWidth sx={{ marginBottom: 2 }}>
+                        <InputLabel>Exam Type</InputLabel>
+                        <Select
+                            value={editExam?.examType || ''}
+                            onChange={(e) =>
+                                setEditExam((prev) => (prev ? { ...prev, examType: e.target.value } : null))
+                            }
+                        >
+                            <MenuItem value="Quarterly">Quarterly</MenuItem>
+                            <MenuItem value="Half-Yearly">Half-Yearly</MenuItem>
+                            <MenuItem value="Annual">Annual</MenuItem>
+                        </Select>
+                    </FormControl>
+
+                    <TextField
+                        label="Subject"
+                        fullWidth
+                        sx={{ marginBottom: 2 }}
+                        value={editExam?.subject || ''}
+                        onChange={(e) =>
+                            setEditExam((prev) => (prev ? { ...prev, subject: e.target.value } : null))
+                        }
+                    />
+                    <TextField
+                        label="Date"
+                        type="date"
+                        fullWidth
+                        InputLabelProps={{ shrink: true }}
+                        value={editExam?.date || ''}
+                        onChange={(e) =>
+                            setEditExam((prev) => (prev ? { ...prev, date: e.target.value } : null))
+                        }
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setOpenEditDialog(false)} color="secondary">
+                        Cancel
+                    </Button>
+                    <Button
+                        variant="contained"
+                        sx={{
+                            backgroundColor: '#2E7D32',
+                            color: '#FFFFFF',
+                            '&:hover': { backgroundColor: '#1B5E20' },
+                        }}
+                        onClick={handleEditExam}
+                    >
+                        Save Changes
                     </Button>
                 </DialogActions>
             </Dialog>

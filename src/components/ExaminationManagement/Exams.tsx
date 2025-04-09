@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Box,
     Typography,
@@ -15,7 +15,12 @@ import {
     MenuItem,
     FormControl,
     InputLabel,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
 } from '@mui/material';
+import config from '../../config'; // Import the config file
 
 interface Exam {
     id: number;
@@ -25,18 +30,106 @@ interface Exam {
 }
 
 const Exams: React.FC = () => {
-    const [exams, setExams] = useState<Exam[]>([
-        { id: 1, grade: 'Nursery', subject: 'Math', date: '2025-04-10' },
-        { id: 2, grade: 'Class 1', subject: 'Science', date: '2025-04-12' },
-    ]);
-    const [newExam, setNewExam] = useState({ grade: '', subject: '', date: '' });
+    const [exams, setExams] = useState<Exam[]>([]); // Exam data
+    const [newExam, setNewExam] = useState({ grade: '', subject: '', date: '' }); // New exam form data
+    const [editExam, setEditExam] = useState<Exam | null>(null); // Exam to edit
+    const [openAddDialog, setOpenAddDialog] = useState(false); // Add dialog state
+    const [openEditDialog, setOpenEditDialog] = useState(false); // Edit dialog state
 
-    const handleAddExam = () => {
-        if (newExam.grade && newExam.subject && newExam.date) {
-            setExams([...exams, { id: exams.length + 1, ...newExam }]);
-            setNewExam({ grade: '', subject: '', date: '' });
+    // Fetch exams from the backend
+    const fetchExams = async () => {
+        try {
+            const response = await fetch(`${config.BASE_URL}/exams`, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('token')}`,
+                },
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setExams(data);
+            } else {
+                console.error('Failed to fetch exams');
+            }
+        } catch (error) {
+            console.error('Error fetching exams:', error);
         }
     };
+
+    // Add a new exam
+    const handleAddExam = async () => {
+        if (newExam.grade && newExam.subject && newExam.date) {
+            try {
+                const response = await fetch(`${config.BASE_URL}/exams`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${localStorage.getItem('token')}`,
+                    },
+                    body: JSON.stringify(newExam),
+                });
+
+                if (response.ok) {
+                    fetchExams(); // Refresh the exam list
+                    setOpenAddDialog(false); // Close the dialog
+                    setNewExam({ grade: '', subject: '', date: '' }); // Reset the form
+                } else {
+                    console.error('Failed to add exam');
+                }
+            } catch (error) {
+                console.error('Error adding exam:', error);
+            }
+        }
+    };
+
+    // Edit an existing exam
+    const handleEditExam = async () => {
+        if (editExam) {
+            try {
+                const response = await fetch(`${config.BASE_URL}/exams/${editExam.id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${localStorage.getItem('token')}`,
+                    },
+                    body: JSON.stringify(editExam),
+                });
+
+                if (response.ok) {
+                    fetchExams(); // Refresh the exam list
+                    setOpenEditDialog(false); // Close the dialog
+                    setEditExam(null); // Reset the edit state
+                } else {
+                    console.error('Failed to edit exam');
+                }
+            } catch (error) {
+                console.error('Error editing exam:', error);
+            }
+        }
+    };
+
+    // Delete an exam
+    const handleDeleteExam = async (id: number) => {
+        try {
+            const response = await fetch(`${config.BASE_URL}/exams/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('token')}`,
+                },
+            });
+
+            if (response.ok) {
+                fetchExams(); // Refresh the exam list
+            } else {
+                console.error('Failed to delete exam');
+            }
+        } catch (error) {
+            console.error('Error deleting exam:', error);
+        }
+    };
+
+    useEffect(() => {
+        fetchExams(); // Fetch exams on component mount
+    }, []);
 
     return (
         <Box sx={{ padding: 3 }}>
@@ -48,55 +141,22 @@ const Exams: React.FC = () => {
                     Schedule exams and manage grading for all grades.
                 </Typography>
             </Paper>
-            <Box sx={{ marginBottom: 3 }}>
-                <FormControl sx={{ marginRight: 2, minWidth: 150 }}>
-                    <InputLabel>Grade</InputLabel>
-                    <Select
-                        value={newExam.grade}
-                        onChange={(e) => setNewExam({ ...newExam, grade: e.target.value })}
-                        label="Grade"
-                    >
-                        <MenuItem value="Nursery">Nursery</MenuItem>
-                        <MenuItem value="LKG">LKG</MenuItem>
-                        <MenuItem value="UKG">UKG</MenuItem>
-                        <MenuItem value="Class 1">Class 1</MenuItem>
-                        <MenuItem value="Class 2">Class 2</MenuItem>
-                        <MenuItem value="Class 3">Class 3</MenuItem>
-                        <MenuItem value="Class 4">Class 4</MenuItem>
-                        <MenuItem value="Class 5">Class 5</MenuItem>
-                        <MenuItem value="Class 6">Class 6</MenuItem>
-                        <MenuItem value="Class 7">Class 7</MenuItem>
-                        <MenuItem value="Class 8">Class 8</MenuItem>
-                    </Select>
-                </FormControl>
-                <TextField
-                    label="Subject"
-                    variant="outlined"
-                    value={newExam.subject}
-                    onChange={(e) => setNewExam({ ...newExam, subject: e.target.value })}
-                    sx={{ marginRight: 2 }}
-                />
-                <TextField
-                    label="Date"
-                    type="date"
-                    variant="outlined"
-                    value={newExam.date}
-                    onChange={(e) => setNewExam({ ...newExam, date: e.target.value })}
-                    InputLabelProps={{ shrink: true }}
-                />
-                <Button
-                    variant="contained"
-                    sx={{
-                        marginLeft: 2,
-                        backgroundColor: '#2E7D32',
-                        color: '#FFFFFF',
-                        '&:hover': { backgroundColor: '#1B5E20' },
-                    }}
-                    onClick={handleAddExam}
-                >
-                    Add Exam
-                </Button>
-            </Box>
+
+            {/* Add Exam Button */}
+            <Button
+                variant="contained"
+                sx={{
+                    marginBottom: 3,
+                    backgroundColor: '#2E7D32',
+                    color: '#FFFFFF',
+                    '&:hover': { backgroundColor: '#1B5E20' },
+                }}
+                onClick={() => setOpenAddDialog(true)}
+            >
+                Add New Exam
+            </Button>
+
+            {/* Exam Table */}
             <TableContainer component={Paper}>
                 <Table>
                     <TableHead>
@@ -105,6 +165,7 @@ const Exams: React.FC = () => {
                             <TableCell>Grade</TableCell>
                             <TableCell>Subject</TableCell>
                             <TableCell>Date</TableCell>
+                            <TableCell>Actions</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -114,11 +175,121 @@ const Exams: React.FC = () => {
                                 <TableCell>{exam.grade}</TableCell>
                                 <TableCell>{exam.subject}</TableCell>
                                 <TableCell>{exam.date}</TableCell>
+                                <TableCell>
+                                    <Button
+                                        variant="contained"
+                                        color="primary"
+                                        sx={{ marginRight: 1 }}
+                                        onClick={() => {
+                                            setEditExam(exam);
+                                            setOpenEditDialog(true);
+                                        }}
+                                    >
+                                        Edit
+                                    </Button>
+                                    <Button
+                                        variant="contained"
+                                        color="error"
+                                        onClick={() => handleDeleteExam(exam.id)}
+                                    >
+                                        Delete
+                                    </Button>
+                                </TableCell>
                             </TableRow>
                         ))}
                     </TableBody>
                 </Table>
             </TableContainer>
+
+            {/* Add Exam Dialog */}
+            <Dialog open={openAddDialog} onClose={() => setOpenAddDialog(false)}>
+                <DialogTitle>Add New Exam</DialogTitle>
+                <DialogContent>
+                    <FormControl fullWidth sx={{ marginBottom: 2 }}>
+                        <InputLabel>Grade</InputLabel>
+                        <Select
+                            value={newExam.grade}
+                            onChange={(e) => setNewExam({ ...newExam, grade: e.target.value })}
+                        >
+                            <MenuItem value="Nursery">Nursery</MenuItem>
+                            <MenuItem value="Class 1">Class 1</MenuItem>
+                            <MenuItem value="Class 2">Class 2</MenuItem>
+                            <MenuItem value="Class 3">Class 3</MenuItem>
+                        </Select>
+                    </FormControl>
+                    <TextField
+                        label="Subject"
+                        fullWidth
+                        sx={{ marginBottom: 2 }}
+                        value={newExam.subject}
+                        onChange={(e) => setNewExam({ ...newExam, subject: e.target.value })}
+                    />
+                    <TextField
+                        label="Date"
+                        type="date"
+                        fullWidth
+                        InputLabelProps={{ shrink: true }}
+                        value={newExam.date}
+                        onChange={(e) => setNewExam({ ...newExam, date: e.target.value })}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setOpenAddDialog(false)} color="secondary">
+                        Cancel
+                    </Button>
+                    <Button onClick={handleAddExam} variant="contained" sx={{ backgroundColor: '#2E7D32' }}>
+                        Add Exam
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Edit Exam Dialog */}
+            <Dialog open={openEditDialog} onClose={() => setOpenEditDialog(false)}>
+                <DialogTitle>Edit Exam</DialogTitle>
+                <DialogContent>
+                    <FormControl fullWidth sx={{ marginBottom: 2 }}>
+                        <InputLabel>Grade</InputLabel>
+                        <Select
+                            value={editExam?.grade || ''}
+                            onChange={(e) =>
+                                setEditExam((prev) => (prev ? { ...prev, grade: e.target.value } : null))
+                            }
+                        >
+                            <MenuItem value="Nursery">Nursery</MenuItem>
+                            <MenuItem value="Class 1">Class 1</MenuItem>
+                            <MenuItem value="Class 2">Class 2</MenuItem>
+                            <MenuItem value="Class 3">Class 3</MenuItem>
+                        </Select>
+                    </FormControl>
+                    <TextField
+                        label="Subject"
+                        fullWidth
+                        sx={{ marginBottom: 2 }}
+                        value={editExam?.subject || ''}
+                        onChange={(e) =>
+                            setEditExam((prev) => (prev ? { ...prev, subject: e.target.value } : null))
+                        }
+                    />
+                    <TextField
+                        label="Date"
+                        type="date"
+                        fullWidth
+                        InputLabelProps={{ shrink: true }}
+                        value={editExam?.date || ''}
+                        onChange={(e) =>
+                            setEditExam((prev) => (prev ? { ...prev, date: e.target.value } : null))
+                        }
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setOpenEditDialog(false)} color="secondary">
+                        Cancel
+                    </Button>
+                    <Button onClick={handleEditExam} variant="contained" sx={{ backgroundColor: '#2E7D32' }}>
+                        Save Changes
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Box>
     );
 };
