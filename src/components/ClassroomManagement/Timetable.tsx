@@ -44,7 +44,7 @@ const Timetable: React.FC = () => {
     const [grade, setGrade] = useState<string>(''); // Selected grade
     const [examType, setExamType] = useState<string>(''); // Selected exam type
     const [rows, setRows] = useState<TimetableRow[]>([{ date: '', subject: '' }]); // Dynamic rows
-    const [editExam, setEditExam] = useState<ExamEntry | null>(null); // Exam to edit
+    const [editExamId, setEditExamId] = useState<number | null>(null); // ID of the exam being edited
 
     // Fetch Exam Timetable (GET)
     const fetchExamTimetable = async () => {
@@ -65,7 +65,7 @@ const Timetable: React.FC = () => {
         }
     };
 
-    // Add a New Exam Timetable (POST)
+    // Add or Edit Exam Timetable (POST or PUT)
     const handleSubmit = async () => {
         if (grade && examType && rows.every((row) => row.date && row.subject)) {
             const payload = {
@@ -75,8 +75,13 @@ const Timetable: React.FC = () => {
             };
 
             try {
-                const response = await fetch(`${config.BASE_URL}/ExamSchedule`, {
-                    method: 'POST',
+                const url = editExamId
+                    ? `${config.BASE_URL}/ExamSchedule/${editExamId}`
+                    : `${config.BASE_URL}/ExamSchedule`;
+                const method = editExamId ? 'PUT' : 'POST';
+
+                const response = await fetch(url, {
+                    method,
                     headers: {
                         'Content-Type': 'application/json',
                         Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -84,52 +89,33 @@ const Timetable: React.FC = () => {
                     body: JSON.stringify(payload),
                 });
 
-                console.log('Payload:', payload);
-                console.log('API Response:', response);
-
                 if (response.ok) {
-                    alert('Exam timetable added successfully!');
+                    alert(`Exam timetable ${editExamId ? 'updated' : 'added'} successfully!`);
                     setGrade('');
                     setExamType('');
                     setRows([{ date: '', subject: '' }]); // Reset the form
-                    setOpenAddDialog(false); // Close the dialog
+                    setOpenAddDialog(false);
+                    setOpenEditDialog(false);
+                    setEditExamId(null);
                     fetchExamTimetable(); // Refresh the timetable
                 } else {
-                    alert('Failed to add exam timetable.');
+                    alert(`Failed to ${editExamId ? 'update' : 'add'} exam timetable.`);
                 }
             } catch (error) {
-                console.error('Error adding exam timetable:', error);
+                console.error(`Error ${editExamId ? 'updating' : 'adding'} exam timetable:`, error);
             }
         } else {
             alert('Please fill out all fields.');
         }
     };
- 
-    // Edit an Existing Exam Timetable (PUT)
-    const handleEditExam = async () => {
-        if (editExam) {
-            try {
-                const response = await fetch(`${config.BASE_URL}/ExamSchedule/${editExam.id}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Authorization: `Bearer ${localStorage.getItem('token')}`,
-                    },
-                    body: JSON.stringify(editExam),
-                });
 
-                if (response.ok) {
-                    alert('Exam timetable updated successfully!');
-                    setOpenEditDialog(false); // Close the dialog
-                    setEditExam(null); // Reset the edit state
-                    fetchExamTimetable(); // Refresh the timetable
-                } else {
-                    alert('Failed to update exam timetable.');
-                }
-            } catch (error) {
-                console.error('Error updating exam timetable:', error);
-            }
-        }
+    // Open Edit Dialog with Prefilled Data
+    const handleEditClick = (exam: ExamEntry) => {
+        setGrade(exam.grade);
+        setExamType(exam.examType);
+        setRows([{ date: exam.date, subject: exam.subject }]); // Prefill rows
+        setEditExamId(exam.id);
+        setOpenEditDialog(true);
     };
 
     // Delete an Exam Timetable (DELETE)
@@ -194,7 +180,12 @@ const Timetable: React.FC = () => {
                         color: '#FFFFFF',
                         '&:hover': { backgroundColor: '#1B5E20' },
                     }}
-                    onClick={() => setOpenAddDialog(true)}
+                    onClick={() => {
+                        setGrade('');
+                        setExamType('');
+                        setRows([{ date: '', subject: '' }]); // Reset form for adding
+                        setOpenAddDialog(true);
+                    }}
                 >
                     Add New Exam
                 </Button>
@@ -205,8 +196,6 @@ const Timetable: React.FC = () => {
                         <TableRow>
                             <TableCell>ID</TableCell>
                             <TableCell>Grade</TableCell>
-                            <TableCell>Subject</TableCell>
-                            <TableCell>Date</TableCell>
                             <TableCell>Exam Type</TableCell>
                             <TableCell>Actions</TableCell>
                         </TableRow>
@@ -216,18 +205,13 @@ const Timetable: React.FC = () => {
                             <TableRow key={exam.id}>
                                 <TableCell>{exam.id}</TableCell>
                                 <TableCell>{exam.grade}</TableCell>
-                                <TableCell>{exam.subject}</TableCell>
-                                <TableCell>{exam.date}</TableCell>
                                 <TableCell>{exam.examType}</TableCell>
                                 <TableCell>
                                     <Button
                                         variant="contained"
                                         color="primary"
                                         sx={{ marginRight: 1 }}
-                                        onClick={() => {
-                                            setEditExam(exam);
-                                            setOpenEditDialog(true);
-                                        }}
+                                        onClick={() => handleEditClick(exam)}
                                     >
                                         Edit
                                     </Button>
@@ -245,9 +229,17 @@ const Timetable: React.FC = () => {
                 </Table>
             </TableContainer>
 
-            {/* Add Exam Dialog */}
-            <Dialog open={openAddDialog} onClose={() => setOpenAddDialog(false)} fullWidth maxWidth="md">
-                <DialogTitle>Add New Exam Timetable</DialogTitle>
+            {/* Add/Edit Exam Dialog */}
+            <Dialog
+                open={openAddDialog || openEditDialog}
+                onClose={() => {
+                    setOpenAddDialog(false);
+                    setOpenEditDialog(false);
+                }}
+                fullWidth
+                maxWidth="md"
+            >
+                <DialogTitle>{editExamId ? 'Edit Exam Timetable' : 'Add New Exam Timetable'}</DialogTitle>
                 <DialogContent>
                     <FormControl fullWidth sx={{ marginBottom: 2 }}>
                         <InputLabel>Grade</InputLabel>
@@ -310,7 +302,13 @@ const Timetable: React.FC = () => {
                     </Button>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={() => setOpenAddDialog(false)} color="secondary">
+                    <Button
+                        onClick={() => {
+                            setOpenAddDialog(false);
+                            setOpenEditDialog(false);
+                        }}
+                        color="secondary"
+                    >
                         Cancel
                     </Button>
                     <Button
@@ -322,78 +320,7 @@ const Timetable: React.FC = () => {
                         }}
                         onClick={handleSubmit}
                     >
-                        Submit Timetable
-                    </Button>
-                </DialogActions>
-            </Dialog>
-
-            {/* Edit Exam Dialog */}
-            <Dialog open={openEditDialog} onClose={() => setOpenEditDialog(false)} fullWidth maxWidth="md">
-                <DialogTitle>Edit Exam Timetable</DialogTitle>
-                <DialogContent>
-                    <FormControl fullWidth sx={{ marginBottom: 2 }}>
-                        <InputLabel>Grade</InputLabel>
-                        <Select
-                            value={editExam?.grade || ''}
-                            onChange={(e) =>
-                                setEditExam((prev) => (prev ? { ...prev, grade: e.target.value } : null))
-                            }
-                        >
-                            <MenuItem value="Nursery">Nursery</MenuItem>
-                            <MenuItem value="Class 1">Class 1</MenuItem>
-                            <MenuItem value="Class 2">Class 2</MenuItem>
-                            <MenuItem value="Class 3">Class 3</MenuItem>
-                        </Select>
-                    </FormControl>
-
-                    <FormControl fullWidth sx={{ marginBottom: 2 }}>
-                        <InputLabel>Exam Type</InputLabel>
-                        <Select
-                            value={editExam?.examType || ''}
-                            onChange={(e) =>
-                                setEditExam((prev) => (prev ? { ...prev, examType: e.target.value } : null))
-                            }
-                        >
-                            <MenuItem value="Quarterly">Quarterly</MenuItem>
-                            <MenuItem value="Half-Yearly">Half-Yearly</MenuItem>
-                            <MenuItem value="Annual">Annual</MenuItem>
-                        </Select>
-                    </FormControl>
-
-                    <TextField
-                        label="Subject"
-                        fullWidth
-                        sx={{ marginBottom: 2 }}
-                        value={editExam?.subject || ''}
-                        onChange={(e) =>
-                            setEditExam((prev) => (prev ? { ...prev, subject: e.target.value } : null))
-                        }
-                    />
-                    <TextField
-                        label="Date"
-                        type="date"
-                        fullWidth
-                        InputLabelProps={{ shrink: true }}
-                        value={editExam?.date || ''}
-                        onChange={(e) =>
-                            setEditExam((prev) => (prev ? { ...prev, date: e.target.value } : null))
-                        }
-                    />
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setOpenEditDialog(false)} color="secondary">
-                        Cancel
-                    </Button>
-                    <Button
-                        variant="contained"
-                        sx={{
-                            backgroundColor: '#2E7D32',
-                            color: '#FFFFFF',
-                            '&:hover': { backgroundColor: '#1B5E20' },
-                        }}
-                        onClick={handleEditExam}
-                    >
-                        Save Changes
+                        {editExamId ? 'Save Changes' : 'Submit Timetable'}
                     </Button>
                 </DialogActions>
             </Dialog>
