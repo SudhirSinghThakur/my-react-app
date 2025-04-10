@@ -71,7 +71,7 @@ const Timetable: React.FC = () => {
             const payload = {
                 grade,
                 examType,
-                timetable: rows,
+                examDetails: rows,
             };
 
             try {
