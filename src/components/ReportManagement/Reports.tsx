@@ -55,24 +55,11 @@ const Reports: React.FC = () => {
         }
     };
 
-    // Extract unique classes from students
-    const uniqueClasses = Array.from(new Set(students.map((student) => student.class)));
-
-    useEffect(() => {
-        fetchStudents();
-    }, []);
-
-    useEffect(() => {
-        if (grade) {
-            fetchExamTimetable(grade);
-        }
-    }, [grade]);
-
-    // Fetch exam timetable from the backend
-    const fetchExamTimetable = async (selectedGrade: string) => {
+    // Fetch exam timetable from the backend (only once)
+    const fetchExamTimetable = async () => {
         setLoading(true);
         try {
-            const response = await fetch(`${config.BASE_URL}/ExamSchedule?grade=${selectedGrade}`, {
+            const response = await fetch(`${config.BASE_URL}/ExamSchedule`, {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('token')}`,
                 },
@@ -90,6 +77,17 @@ const Reports: React.FC = () => {
             setLoading(false);
         }
     };
+
+    // Extract unique classes from students
+    const uniqueClasses = Array.from(new Set(students.map((student) => student.class)));
+
+    // Filter exam timetable based on the selected grade
+    const filteredExamTimetable = examTimetable.find((exam) => exam.grade === grade);
+
+    useEffect(() => {
+        fetchStudents();
+        fetchExamTimetable(); // Fetch exam timetable only once
+    }, []);
 
     // Handle printing admit cards
     const handlePrintAdmitCards = () => {
@@ -111,10 +109,7 @@ const Reports: React.FC = () => {
             return;
         }
 
-        // Find the exam timetable for the selected grade
-        const selectedExamTimetable = examTimetable.find((exam) => exam.grade === grade);
-
-        if (!selectedExamTimetable || !selectedExamTimetable.timetable) {
+        if (!filteredExamTimetable || !filteredExamTimetable.timetable) {
             console.error('No exam timetable matches the selected grade.');
             return;
         }
@@ -137,8 +132,8 @@ const Reports: React.FC = () => {
             <div class="timetable">
                 <h4>Timetable:</h4>
                 ${
-                    selectedExamTimetable.timetable && selectedExamTimetable.timetable.length > 0
-                        ? selectedExamTimetable.timetable
+                    filteredExamTimetable.timetable && filteredExamTimetable.timetable.length > 0
+                        ? filteredExamTimetable.timetable
                               .map(
                                   (exam) =>
                                       `<p>${new Date(exam.date).toLocaleDateString('en-GB')} - ${
