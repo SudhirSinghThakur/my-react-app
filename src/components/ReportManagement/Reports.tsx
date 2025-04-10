@@ -13,10 +13,10 @@ import {
 import config from '../../config'; // Import the config file
 
 interface Student {
-    Id: number;
-    StudentName: string;
-    Class: string;
-    FatherName: string;
+    id: number;
+    studentName: string;
+    class: string;
+    fatherName: string;
 }
 
 interface Exam {
@@ -90,7 +90,7 @@ const Reports: React.FC = () => {
         }
 
         const filteredStudents = students.filter((student) =>
-            selectedStudent ? student.Id.toString() === selectedStudent : true
+            selectedStudent ? student.id.toString() === selectedStudent : true
         );
 
         if (filteredStudents.length === 0) {
@@ -109,10 +109,10 @@ const Reports: React.FC = () => {
                 (student) => `
                 <div class="admit-card">
                     <h3>DADA VIKRAM PUBLIC SCHOOL</h3>
-                    <p><strong>Class:</strong> ${student.Class || 'N/A'}</p>
-                    <p><strong>Student Name:</strong> ${student.StudentName || 'N/A'}</p>
-                    <p><strong>Father's Name:</strong> ${student.FatherName || 'N/A'}</p>
-                    <p><strong>Roll No:</strong> ${student.Id || 'N/A'}</p>
+                    <p><strong>Class:</strong> ${student.class || 'N/A'}</p>
+                    <p><strong>Student Name:</strong> ${student.studentName || 'N/A'}</p>
+                    <p><strong>Father's Name:</strong> ${student.fatherName || 'N/A'}</p>
+                    <p><strong>Roll No:</strong> ${student.id || 'N/A'}</p>
                     <div class="timetable">
                         <h4>Timetable:</h4>
                         ${
@@ -262,8 +262,8 @@ const Reports: React.FC = () => {
                     >
                         <MenuItem value="">All Students</MenuItem>
                         {students.map((student) => (
-                            <MenuItem key={student.Id} value={student.Id}>
-                                {student.StudentName}
+                            <MenuItem key={student.id} value={student.id}>
+                                {student.studentName}
                             </MenuItem>
                         ))}
                     </Select>
