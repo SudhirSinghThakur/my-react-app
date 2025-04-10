@@ -266,15 +266,26 @@ const Timetable: React.FC = () => {
                 <DialogTitle>{editExamId ? 'Edit Exam Timetable' : 'Add New Exam Timetable'}</DialogTitle>
                 <DialogContent>
                     <FormControl fullWidth sx={{ marginBottom: 2 }}>
-                        <InputLabel>Grade</InputLabel>
+                        <InputLabel>Class</InputLabel> {/* Changed label to "Class" */}
                         <Select
                             value={grade}
-                            onChange={(e) => setGrade(e.target.value)}
+                            onChange={(e) => {
+                                setGrade(e.target.value);
+                            }}
+                            label="Class"
                         >
+                            <MenuItem value="">All Classes</MenuItem>
                             <MenuItem value="Nursery">Nursery</MenuItem>
-                            <MenuItem value="Class 1">Class 1</MenuItem>
-                            <MenuItem value="Class 2">Class 2</MenuItem>
-                            <MenuItem value="Class 3">Class 3</MenuItem>
+                            <MenuItem value="KG - I">KG - I</MenuItem>
+                            <MenuItem value="KG - II">KG - II</MenuItem>
+                            <MenuItem value="1st">1st</MenuItem>
+                            <MenuItem value="2nd">2nd</MenuItem>
+                            <MenuItem value="3rd">3rd</MenuItem>
+                            <MenuItem value="4th">4th</MenuItem>
+                            <MenuItem value="5th">5th</MenuItem>
+                            <MenuItem value="6th">6th</MenuItem>
+                            <MenuItem value="7th">7th</MenuItem>
+                            <MenuItem value="8th">7th</MenuItem>
                         </Select>
                     </FormControl>
 
