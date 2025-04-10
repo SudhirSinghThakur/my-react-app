@@ -90,7 +90,7 @@ const Timetable: React.FC = () => {
                 });
 
                 if (response.ok) {
-                    alert(`Exam timetable ${editExamId ? 'updated' : 'added'} successfully!`);
+                    console.log(`Exam timetable ${editExamId ? 'updated' : 'added'} successfully!`);
                     setGrade('');
                     setExamType('');
                     setRows([{ date: '', subject: '' }]); // Reset the form
@@ -99,13 +99,13 @@ const Timetable: React.FC = () => {
                     setEditExamId(null);
                     fetchExamTimetable(); // Refresh the timetable
                 } else {
-                    alert(`Failed to ${editExamId ? 'update' : 'add'} exam timetable.`);
+                    console.error(`Failed to ${editExamId ? 'update' : 'add'} exam timetable.`);
                 }
             } catch (error) {
                 console.error(`Error ${editExamId ? 'updating' : 'adding'} exam timetable:`, error);
             }
         } else {
-            alert('Please fill out all fields.');
+            console.error('Please fill out all fields.');
         }
     };
 
@@ -153,10 +153,10 @@ const Timetable: React.FC = () => {
             });
 
             if (response.ok) {
-                alert('Exam timetable deleted successfully!');
+                console.log('Exam timetable deleted successfully!');
                 fetchExamTimetable(); // Refresh the timetable
             } else {
-                alert('Failed to delete exam timetable.');
+                console.error('Failed to delete exam timetable.');
             }
         } catch (error) {
             console.error('Error deleting exam timetable:', error);
@@ -211,7 +211,7 @@ const Timetable: React.FC = () => {
                         setOpenAddDialog(true);
                     }}
                 >
-                    Add New Exam
+                    Add Exam Timetable
                 </Button>
             </Box>
             <TableContainer component={Paper}>
