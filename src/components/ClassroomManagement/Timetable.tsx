@@ -110,12 +110,30 @@ const Timetable: React.FC = () => {
     };
 
     // Open Edit Dialog with Prefilled Data
-    const handleEditClick = (exam: ExamEntry) => {
-        setGrade(exam.grade);
-        setExamType(exam.examType);
-        setRows([{ date: exam.date, subject: exam.subject }]); // Prefill rows
-        setEditExamId(exam.id);
-        setOpenEditDialog(true);
+    const handleEditClick = async (exam: ExamEntry) => {
+        try {
+            // Fetch the specific timetable details from the backend
+            const response = await fetch(`${config.BASE_URL}/ExamSchedule/${exam.id}`, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('token')}`,
+                },
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+
+                // Update the state with the fetched data
+                setGrade(data.grade);
+                setExamType(data.examType);
+                setRows(data.timetable || []); // Ensure timetable is an array
+                setEditExamId(exam.id);
+                setOpenEditDialog(true);
+            } else {
+                console.error('Failed to fetch timetable details');
+            }
+        } catch (error) {
+            console.error('Error fetching timetable details:', error);
+        }
     };
 
     // Delete an Exam Timetable (DELETE)
