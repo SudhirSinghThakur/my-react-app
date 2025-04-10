@@ -122,10 +122,16 @@ const Timetable: React.FC = () => {
             if (response.ok) {
                 const data = await response.json();
 
+                // Format the date to 'YYYY-MM-DD' for each row
+                const formattedRows = data.timetable.map((row: TimetableRow) => ({
+                    ...row,
+                    date: row.date.split('T')[0], // Extract only the date part
+                }));
+
                 // Update the state with the fetched data
                 setGrade(data.grade);
                 setExamType(data.examType);
-                setRows(data.timetable || []); // Ensure timetable is an array
+                setRows(formattedRows); // Ensure timetable is an array with formatted dates
                 setEditExamId(exam.id);
                 setOpenEditDialog(true);
             } else {
