@@ -194,7 +194,7 @@ const Reports: React.FC = () => {
                 box-sizing: border-box;
                 height: 297mm; /* A4 page height */
                 width: 210mm; /* A4 page width */
-                page-break-after: always; /* Ensure each page breaks after 4 cards */
+                page-break-after: always; /* Ensure each page breaks after 2 cards */
             }
             .admit-card {
                 border: 1px solid #000;
@@ -205,8 +205,8 @@ const Reports: React.FC = () => {
                 display: flex;
                 flex-direction: column;
                 justify-content: space-between;
-                height: calc((297mm - 40mm) / 2); /* Divide height for 2 rows, accounting for padding and gaps */
-                width: calc((210mm - 40mm) / 2); /* Divide width for 2 columns, accounting for padding and gaps */
+                height: calc((297mm - 40mm) / 2); /* Keep the height unchanged */
+                width: calc((210mm - 20mm)/ 2); /* Use the full width of the page minus padding */
                 overflow: hidden; /* Prevent content overflow */
             }
             .header {
