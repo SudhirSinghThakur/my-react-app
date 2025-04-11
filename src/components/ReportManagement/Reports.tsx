@@ -189,12 +189,12 @@ const Reports: React.FC = () => {
                 display: grid;
                 grid-template-columns: 1fr 1fr; /* 2 cards per row */
                 grid-template-rows: 1fr 1fr; /* 2 rows per page */
-                gap: 10mm; /* Space between cards */
-                padding: 10mm;
+                gap: 5mm; /* Reduced space between cards */
+                padding: 5mm; /* Reduced padding to utilize more space */
                 box-sizing: border-box;
                 height: 297mm; /* A4 page height */
                 width: 210mm; /* A4 page width */
-                page-break-after: always; /* Ensure each page breaks after 2 cards */
+                page-break-after: always; /* Ensure each page breaks after 4 cards */
             }
             .admit-card {
                 border: 1px solid #000;
@@ -205,8 +205,8 @@ const Reports: React.FC = () => {
                 display: flex;
                 flex-direction: column;
                 justify-content: space-between;
-                height: calc((297mm - 40mm) / 2); /* Keep the height unchanged */
-                width: calc((210mm - 20mm)/ 2); /* Use the full width of the page minus padding */
+                height: calc((297mm - 30mm) / 2); /* Keep the height unchanged */
+                width: calc((210mm - 15mm) / 2); /* Increased width to utilize more space */
                 overflow: hidden; /* Prevent content overflow */
             }
             .header {
@@ -215,7 +215,7 @@ const Reports: React.FC = () => {
             }
             .header h2 {
                 margin: 0;
-                font-size: 20px; /* Increased font size */
+                font-size: 18px; /* Adjusted font size */
                 font-weight: bold;
             }
             .header p {
