@@ -124,29 +124,50 @@ const Reports: React.FC = () => {
             .map(
                 (student) => `
         <div class="admit-card">
-            <h3>DADA VIKRAM PUBLIC SCHOOL</h3>
-            <p><strong>Class:</strong> ${student.class || 'N/A'}</p>
-            <p><strong>Student Name:</strong> ${student.studentName || 'N/A'}</p>
-            <p><strong>Father's Name:</strong> ${student.fatherName || 'N/A'}</p>
-            <p><strong>Roll No:</strong> ${student.id || 'N/A'}</p>
+            <div class="header">
+                <h2>DADA VIKRAM PUBLIC SCHOOL</h2>
+                <p>Samaswara (M.P.)</p>
+                <p><strong>Admit Card 2023-24</strong></p>
+            </div>
+            <div class="details">
+                <p><strong>Class:</strong> ${student.class || 'N/A'}</p>
+                <p><strong>Student Name:</strong> ${student.studentName || 'N/A'}</p>
+                <p><strong>Father's Name:</strong> ${student.fatherName || 'N/A'}</p>
+                <p><strong>Roll No:</strong> ${student.id || 'N/A'}</p>
+            </div>
             <div class="timetable">
-                <h4>Timetable:</h4>
                 ${
-                    filteredExamTimetable.timetable && filteredExamTimetable.timetable.length > 0
-                        ? filteredExamTimetable.timetable
-                              .map(
-                                  (exam) =>
-                                      `<p>${new Date(exam.date).toLocaleDateString('en-GB')} - ${
-                                          exam.subject || 'N/A'
-                                      }</p>`
-                              )
-                              .join('')
+                    filteredExamTimetable?.timetable && filteredExamTimetable.timetable.length > 0
+                        ? `
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Subject</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${filteredExamTimetable.timetable
+                                    .map(
+                                        (exam) => `
+                                        <tr>
+                                            <td>${new Date(exam.date).toLocaleDateString('en-GB')}</td>
+                                            <td>${exam.subject || 'N/A'}</td>
+                                        </tr>
+                                    `
+                                    )
+                                    .join('')}
+                            </tbody>
+                        </table>
+                        `
                         : '<p>No timetable available</p>'
                 }
             </div>
-            <div class="signature">
-                <p>Examiner Sign</p>
-                <p>Principal Sign</p>
+            <div class="footer">
+                <div class="signature">
+                    <p>Examiner Sign</p>
+                    <p>Principal Sign</p>
+                </div>
             </div>
         </div>
     `
@@ -154,68 +175,101 @@ const Reports: React.FC = () => {
             .join('');
 
         const htmlContent = `
-        <html>
-            <head>
-                <title>Admit Cards</title>
-                <style>
-                    body {
-                        font-family: Arial, sans-serif;
-                        margin: 0;
-                        padding: 0;
-                    }
-                    .page {
-                        display: grid;
-                        grid-template-columns: 1fr 1fr; /* 2 cards per row */
-                        grid-template-rows: 1fr 1fr; /* 2 rows per page */
-                        gap: 10mm; /* Space between cards */
-                        padding: 10mm;
-                        box-sizing: border-box;
-                        height: 277mm; /* A4 page height */
-                        width: 190mm; /* A4 page width */
-                        page-break-after: always; /* Ensure each page breaks after 4 cards */
-                    }
-                    .admit-card {
-                        border: 1px solid #000;
-                        border-radius: 8px;
-                        padding: 10mm;
-                        box-sizing: border-box;
-                        text-align: left;
-                        display: flex;
-                        flex-direction: column;
-                        justify-content: space-between;
-                        height: calc((277mm - 40mm) / 2); /* Divide height for 2 rows, accounting for padding and gaps */
-                        width: calc((190mm - 20mm) / 2); /* Divide width for 2 columns, accounting for padding and gaps */
-                    }
-                    .admit-card h3 {
-                        margin: 0;
-                        text-align: center;
-                        font-size: 16px;
-                        font-weight: bold;
-                    }
-                    .admit-card p {
-                        margin: 5px 0;
-                        font-size: 14px;
-                    }
-                    .admit-card .timetable {
-                        margin-top: 10px;
-                        border-top: 1px solid #000;
-                        padding-top: 10px;
-                    }
-                    .admit-card .signature {
-                        margin-top: 20px;
-                        display: flex;
-                        justify-content: space-between;
-                        font-size: 12px;
-                    }
-                </style>
-            </head>
-            <body>
-                <div class="page">
-                    ${admitCardsHTML}
-                </div>
-            </body>
-        </html>
-    `;
+<html>
+    <head>
+        <title>Admit Cards</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 0;
+                padding: 0;
+                background-color: #f4f4f9;
+            }
+            .page {
+                display: grid;
+                grid-template-columns: 1fr 1fr; /* 2 cards per row */
+                grid-template-rows: 1fr 1fr; /* 2 rows per page */
+                gap: 10mm; /* Space between cards */
+                padding: 10mm;
+                box-sizing: border-box;
+                height: 297mm; /* A4 page height */
+                width: 210mm; /* A4 page width */
+                page-break-after: always; /* Ensure each page breaks after 4 cards */
+            }
+            .admit-card {
+                border: 1px solid #000;
+                border-radius: 8px;
+                padding: 10mm;
+                box-sizing: border-box;
+                text-align: left;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                height: calc((297mm - 40mm) / 2); /* Divide height for 2 rows, accounting for padding and gaps */
+                width: calc((210mm - 40mm) / 2); /* Divide width for 2 columns, accounting for padding and gaps */
+                overflow: hidden; /* Prevent content overflow */
+            }
+            .header {
+                text-align: center;
+                margin-bottom: 10px;
+            }
+            .header h2 {
+                margin: 0;
+                font-size: 20px; /* Increased font size */
+                font-weight: bold;
+            }
+            .header p {
+                margin: 5px 0;
+                font-size: 14px;
+            }
+            .details {
+                margin-bottom: 10px;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+            .details p {
+                margin: 5px 0;
+            }
+            .timetable {
+                margin-bottom: 10px;
+            }
+            .timetable table {
+                width: 100%;
+                border-collapse: collapse;
+                text-align: left;
+            }
+            .timetable th, .timetable td {
+                border: 1px solid #000;
+                padding: 5px;
+                font-size: 14px;
+            }
+            .footer {
+                text-align: center;
+                font-size: 12px;
+                color: #555;
+                margin-top: auto; /* Push the footer to the bottom */
+            }
+            .footer .signature {
+                display: flex;
+                justify-content: space-between;
+                margin-top: 20px;
+                padding-top: 10px;
+                border-top: 1px solid #000;
+            }
+            .footer .signature p {
+                margin: 0;
+                font-size: 14px;
+                font-weight: bold;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="page">
+            ${admitCardsHTML}
+        </div>
+    </body>
+</html>
+`;
 
         printWindow.document.write(htmlContent);
         printWindow.document.close();
