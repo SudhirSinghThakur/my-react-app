@@ -13,6 +13,7 @@ import {
     IconButton,
     Menu,
     MenuItem,
+    ListItemIcon,
 } from '@mui/material';
 import { useNavigate, Outlet } from 'react-router-dom';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
@@ -24,6 +25,8 @@ import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
 import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
 import BarChartIcon from '@mui/icons-material/BarChart';
+
+const drawerWidth = 260;
 
 const Dashboard: React.FC = () => {
     const navigate = useNavigate();
@@ -37,7 +40,6 @@ const Dashboard: React.FC = () => {
         setAnchorEl(null);
     };
 
-    // Sidebar categories
     const categories = [
         {
             title: 'User Management',
@@ -85,119 +87,102 @@ const Dashboard: React.FC = () => {
     ];
 
     return (
-        <Box sx={{ display: 'flex', height: '100vh', backgroundColor: '#F5F5F5' }}>
+        <Box sx={{ display: 'flex', height: '100vh' }}>
             <CssBaseline />
 
-            {/* Sidebar Drawer */}
+            {/* Sidebar */}
             <Drawer
                 variant="permanent"
                 sx={{
-                    width: 280,
+                    width: drawerWidth,
                     flexShrink: 0,
                     [`& .MuiDrawer-paper`]: {
-                        width: 280,
+                        width: drawerWidth,
                         boxSizing: 'border-box',
                         backgroundColor: '#2E7D32',
                         color: '#FFFFFF',
-                        display: 'flex',
-                        flexDirection: 'column',
                     },
                 }}
             >
-                {/* Branding Section */}
-                <Box
-                    sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        padding: 2,
-                        backgroundColor: '#1B5E20',
-                    }}
-                >
-                    <Typography
-                        variant="h6"
-                        noWrap
-                        sx={{
-                            fontWeight: 'bold',
-                            textAlign: 'center',
-                            color: '#FFFFFF',
-                        }}
-                    >
-                        School Management
+                <Box sx={{ textAlign: 'center', py: 2, backgroundColor: '#1B5E20' }}>
+                    <Typography variant="h6" fontWeight="bold" color="#FFFFFF">
+                        Dashboard
                     </Typography>
                 </Box>
-                <Divider sx={{ backgroundColor: '#FFFFFF' }} />
 
-                {/* Sidebar Items */}
+                <Divider sx={{ backgroundColor: '#C8E6C9' }} />
+
                 <List>
                     {categories.map((category) => (
-                        <React.Fragment key={category.title}>
+                        <Box key={category.title}>
                             <Typography
-                                variant="subtitle1"
+                                variant="subtitle2"
                                 sx={{
-                                    padding: 1,
+                                    px: 2,
+                                    pt: 2,
+                                    pb: 1,
+                                    color: '#C8E6C9',
                                     fontWeight: 'bold',
-                                    color: '#FFC107',
-                                    textTransform: 'uppercase',
-                                    fontSize: '0.8rem',
+                                    fontSize: '0.75rem',
                                 }}
                             >
                                 {category.title}
                             </Typography>
                             {category.modules.map((module) => (
                                 <ListItem
-                                    button
                                     key={module.name}
+                                    button
                                     onClick={() => navigate(module.path)}
                                     sx={{
                                         '&:hover': { backgroundColor: '#1B5E20' },
+                                        px: 3,
                                     }}
                                 >
-                                    <IconButton
-                                        sx={{
-                                            color: '#FFFFFF',
-                                            marginRight: 2,
-                                        }}
-                                    >
+                                    <ListItemIcon sx={{ color: '#FFFFFF', minWidth: 36 }}>
                                         {module.icon}
-                                    </IconButton>
+                                    </ListItemIcon>
                                     <ListItemText
                                         primary={module.name}
                                         primaryTypographyProps={{
                                             fontSize: '0.9rem',
-                                            fontWeight: 'bold',
+                                            fontWeight: 500,
                                         }}
                                     />
                                 </ListItem>
                             ))}
-                            <Divider sx={{ backgroundColor: '#FFFFFF' }} />
-                        </React.Fragment>
+                            <Divider sx={{ backgroundColor: '#C8E6C9' }} />
+                        </Box>
                     ))}
                 </List>
             </Drawer>
 
-            {/* Main Content */}
-            <Box sx={{ flexGrow: 1, padding: 3 }}>
-                {/* Top Navigation Bar */}
+            {/* Main Content Area */}
+            <Box
+                component="main"
+                sx={{
+                    flexGrow: 1,
+                    bgcolor: '#F1F8E9',
+                    minHeight: '100vh',
+                }}
+            >
+                {/* Top NavBar */}
                 <AppBar
                     position="static"
+                    elevation={0}
                     sx={{
                         backgroundColor: '#2E7D32',
-                        marginBottom: 3,
-                        borderRadius: 2,
-                        boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.2)',
+                        borderRadius: 0,
+                        paddingLeft: `${drawerWidth}px`, // Ensures alignment with the drawer
                     }}
                 >
                     <Toolbar>
-                        <Typography variant="h6" sx={{ flexGrow: 1 }}>
-                            Dashboard
-                        </Typography>
+                    <Typography variant="h6" textAlign={'left'} sx={{ flexGrow: 1 }} fontWeight="bold" color="#FFFFFF">
+                        Dada Vikram Public School
+                    </Typography>
                         <IconButton
                             color="inherit"
                             onClick={handleMenuOpen}
-                            sx={{
-                                '&:hover': { backgroundColor: '#1B5E20' },
-                            }}
+                            sx={{ '&:hover': { backgroundColor: '#1B5E20' } }}
                         >
                             <AccountCircleIcon />
                         </IconButton>
@@ -212,7 +197,9 @@ const Dashboard: React.FC = () => {
                 </AppBar>
 
                 {/* Render Child Routes */}
-                <Outlet />
+                <Box sx={{ p: 3 }}>
+                    <Outlet />
+                </Box>
             </Box>
         </Box>
     );
