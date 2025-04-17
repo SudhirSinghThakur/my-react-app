@@ -60,7 +60,7 @@ const Dashboard: React.FC = () => {
         {
             title: 'Administrative Tools',
             modules: [
-                { name: 'Fee Structure', path: '/dashboard/fee-structure', icon: <AttachMoneyIcon /> },
+                { name: 'Fee Management', path: '/dashboard/fee-structure', icon: <AttachMoneyIcon /> },
                 { name: 'Noticeboard', path: '/dashboard/noticeboard', icon: <EventNoteIcon /> },
             ],
         },
