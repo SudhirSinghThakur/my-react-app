@@ -19,9 +19,19 @@ interface FeeConfigurationTabProps {
     openPopup: (content: React.ReactNode, title: string) => void;
 }
 
+// Define the type for formData
+interface FormData {
+    id: number | null;
+    className: string;
+    academicYear: string;
+    admissionFee: number;
+    tuitionFee: number;
+    otherFee: number;
+}
+
 const FeeConfigurationTab: React.FC<FeeConfigurationTabProps> = ({ openPopup }) => {
     const [feeConfigurations, setFeeConfigurations] = useState([]);
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState<FormData>({
         id: null,
         className: '',
         academicYear: '',
@@ -30,6 +40,7 @@ const FeeConfigurationTab: React.FC<FeeConfigurationTabProps> = ({ openPopup }) 
         otherFee: 0,
     });
 
+    // Fetch Fee Configurations
     const fetchFeeConfigurations = async () => {
         try {
             const response = await fetch(`${config.BASE_URL}/FeeConfiguration`, {
@@ -53,48 +64,53 @@ const FeeConfigurationTab: React.FC<FeeConfigurationTabProps> = ({ openPopup }) 
         fetchFeeConfigurations();
     }, []);
 
+    // Add Fee Configuration
     const handleAdd = () => {
-        setFormData({
+        const emptyData: FormData = {
             id: null,
             className: '',
             academicYear: '',
             admissionFee: 0,
             tuitionFee: 0,
             otherFee: 0,
-        });
+        };
 
         openPopup(
             <FeeConfigurationForm
-                formData={formData}
+                formData={emptyData}
                 setFormData={setFormData}
                 onSave={fetchFeeConfigurations}
-                onClose={() => openPopup(null, '')} // Close the popup
+                onClose={() => openPopup(null, '')}
             />,
             'Add Fee Configuration'
         );
     };
 
+    // Edit Fee Configuration
     const handleEdit = (item: any) => {
-        setFormData({
+        const updatedFormData: FormData = {
             id: item.id,
             className: item.className,
             academicYear: item.academicYear,
             admissionFee: item.admissionFee,
             tuitionFee: item.tuitionFee,
             otherFee: item.otherFee,
-        });
+        };
+
+        setFormData(updatedFormData);
 
         openPopup(
             <FeeConfigurationForm
-                formData={formData}
+                formData={updatedFormData}
                 setFormData={setFormData}
                 onSave={fetchFeeConfigurations}
-                onClose={() => openPopup(null, '')} // Close the popup
+                onClose={() => openPopup(null, '')}
             />,
             'Edit Fee Configuration'
         );
     };
 
+    // Delete Fee Configuration
     const handleDelete = async (id: number) => {
         if (window.confirm('Are you sure you want to delete this fee configuration?')) {
             try {
@@ -131,7 +147,7 @@ const FeeConfigurationTab: React.FC<FeeConfigurationTabProps> = ({ openPopup }) 
                     List of Fee Configurations:
                 </Typography>
                 <DataTable
-                    columns={['className', 'academicYear', 'admissionFee', 'tuitionFee', 'otherFee', 'totalFee']}
+                    columns={['className', 'academicYear', 'admissionFee', 'tuitionFee', 'otherFee']}
                     data={feeConfigurations}
                     onEdit={handleEdit}
                     onDelete={handleDelete}
@@ -142,30 +158,31 @@ const FeeConfigurationTab: React.FC<FeeConfigurationTabProps> = ({ openPopup }) 
 };
 
 const FeeConfigurationForm: React.FC<{
-    formData: any;
-    setFormData: React.Dispatch<React.SetStateAction<any>>;
+    formData: FormData;
+    setFormData: React.Dispatch<React.SetStateAction<FormData>>;
     onSave: () => void;
     onClose: () => void;
-}> = ({ formData, setFormData, onSave, onClose }) => {
-    // Handle changes for text fields
+}> = ({ formData: initialFormData, setFormData, onSave, onClose }) => {
+    const [formData, updateFormData] = useState<FormData>(initialFormData);
+
     const handleTextFieldChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
-        setFormData((prev: any) => ({
+        updateFormData((prev: FormData) => ({
             ...prev,
-            [name]: name === 'admissionFee' || name === 'tuitionFee' || name === 'otherFee' ? parseFloat(value) || 0 : value,
+            [name]: ['admissionFee', 'tuitionFee', 'otherFee'].includes(name)
+                ? parseFloat(value) || 0
+                : value,
         }));
     };
 
-    // Handle changes for dropdowns
     const handleSelectChange = (e: SelectChangeEvent<string>) => {
         const { name, value } = e.target;
-        setFormData((prev: any) => ({
+        updateFormData((prev: FormData) => ({
             ...prev,
-            [name!]: value,
+            [name]: value,
         }));
     };
 
-    // Handle form submission
     const handleSubmit = async () => {
         const payload = {
             className: formData.className,
@@ -178,8 +195,8 @@ const FeeConfigurationForm: React.FC<{
         try {
             const response = await fetch(
                 formData.id
-                    ? `${config.BASE_URL}/FeeConfiguration/${formData.id}` // Update if editing
-                    : `${config.BASE_URL}/FeeConfiguration`, // Create if adding new
+                    ? `${config.BASE_URL}/FeeConfiguration/${formData.id}`
+                    : `${config.BASE_URL}/FeeConfiguration`,
                 {
                     method: formData.id ? 'PUT' : 'POST',
                     headers: {
@@ -191,8 +208,8 @@ const FeeConfigurationForm: React.FC<{
             );
 
             if (response.ok) {
-                onSave(); // Refresh the list
-                onClose(); // Close the popup after saving
+                onSave();
+                onClose();
             } else {
                 console.error('Failed to save fee configuration');
             }
@@ -203,13 +220,12 @@ const FeeConfigurationForm: React.FC<{
 
     return (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            {/* Class Name Dropdown */}
             <FormControl fullWidth>
                 <InputLabel>Class</InputLabel>
                 <Select
-                    name="className" // Ensure the name attribute is set
-                    value={formData.className}
-                    onChange={handleSelectChange} // Use the Select-specific handler
+                    name="className"
+                    value={formData.className || ''}
+                    onChange={handleSelectChange}
                 >
                     <MenuItem value="">Select a Class</MenuItem>
                     <MenuItem value="Nursery">Nursery</MenuItem>
@@ -226,13 +242,12 @@ const FeeConfigurationForm: React.FC<{
                 </Select>
             </FormControl>
 
-            {/* Academic Year Dropdown */}
             <FormControl fullWidth>
                 <InputLabel>Academic Year</InputLabel>
                 <Select
-                    name="academicYear" // Ensure the name attribute is set
-                    value={formData.academicYear}
-                    onChange={handleSelectChange} // Use the Select-specific handler
+                    name="academicYear"
+                    value={formData.academicYear || ''}
+                    onChange={handleSelectChange}
                 >
                     <MenuItem value="2021-2022">2021-2022</MenuItem>
                     <MenuItem value="2022-2023">2022-2023</MenuItem>
@@ -242,50 +257,38 @@ const FeeConfigurationForm: React.FC<{
                 </Select>
             </FormControl>
 
-            {/* Admission Fee */}
             <TextField
                 label="Admission Fee"
-                name="admissionFee" // Ensure the name attribute is set
+                name="admissionFee"
                 type="number"
-                value={formData.admissionFee}
-                onChange={handleTextFieldChange} // Use the TextField-specific handler
+                value={formData.admissionFee || ''}
+                onChange={handleTextFieldChange}
                 fullWidth
             />
 
-            {/* Tuition Fee */}
             <TextField
                 label="Tuition Fee"
-                name="tuitionFee" // Ensure the name attribute is set
+                name="tuitionFee"
                 type="number"
-                value={formData.tuitionFee}
-                onChange={handleTextFieldChange} // Use the TextField-specific handler
+                value={formData.tuitionFee || ''}
+                onChange={handleTextFieldChange}
                 fullWidth
             />
 
-            {/* Other Fee */}
             <TextField
                 label="Other Fee"
-                name="otherFee" // Ensure the name attribute is set
+                name="otherFee"
                 type="number"
-                value={formData.otherFee}
-                onChange={handleTextFieldChange} // Use the TextField-specific handler
+                value={formData.otherFee || ''}
+                onChange={handleTextFieldChange}
                 fullWidth
             />
 
-            {/* Save and Close Buttons */}
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
-                <Button
-                    variant="contained"
-                    color="secondary"
-                    onClick={onClose} // Close the popup
-                >
+                <Button variant="contained" color="secondary" onClick={onClose}>
                     Close
                 </Button>
-                <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={handleSubmit}
-                >
+                <Button variant="contained" color="primary" onClick={handleSubmit}>
                     Save
                 </Button>
             </Box>
