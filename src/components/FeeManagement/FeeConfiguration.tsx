@@ -1,5 +1,16 @@
 import React, { useState } from 'react';
-import { Box, Typography, TextField, Button, Paper, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import {
+    Box,
+    Typography,
+    TextField,
+    Button,
+    Paper,
+    FormControl,
+    InputLabel,
+    Select,
+    MenuItem,
+} from '@mui/material';
+import config from '../../config'; // Import the config file for the base URL
 
 const FeeConfiguration: React.FC = () => {
     const [className, setClassName] = useState('');
@@ -10,6 +21,8 @@ const FeeConfiguration: React.FC = () => {
         otherFee: 0,
     });
     const [totalFee, setTotalFee] = useState(0);
+    const [loading, setLoading] = useState(false);
+    const [message, setMessage] = useState('');
 
     // Handle Particulars Change
     const handleParticularChange = (key: string, value: number) => {
@@ -21,9 +34,47 @@ const FeeConfiguration: React.FC = () => {
         setTotalFee(total);
     };
 
-    const handleSave = () => {
-        console.log(`Class: ${className}, Academic Year: ${academicYear}, Particulars: ${JSON.stringify(particulars)}, Total Fee: ${totalFee}`);
-        // Save fee structure logic here
+    // Handle Save (API Integration)
+    const handleSave = async () => {
+        if (!className || !academicYear) {
+            setMessage('Please select a class and academic year.');
+            return;
+        }
+
+        const payload = {
+            className,
+            academicYear,
+            particulars,
+            totalFee,
+        };
+
+        try {
+            setLoading(true);
+            setMessage('');
+
+            const response = await fetch(`${config.BASE_URL}/FeeConfiguration`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${localStorage.getItem('token')}`,
+                },
+                body: JSON.stringify(payload),
+            });
+
+            if (response.ok) {
+                setMessage('Fee structure saved successfully!');
+                console.log('API Response:', await response.json());
+            } else {
+                const errorData = await response.json();
+                setMessage(errorData.message || 'Failed to save fee structure.');
+                console.error('API Error:', errorData);
+            }
+        } catch (error) {
+            setMessage('Failed to save fee structure. Please try again.');
+            console.error('Error:', error);
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -110,9 +161,23 @@ const FeeConfiguration: React.FC = () => {
                         '&:hover': { backgroundColor: '#1B5E20' },
                     }}
                     onClick={handleSave}
+                    disabled={loading}
                 >
-                    Save Fee Structure
+                    {loading ? 'Saving...' : 'Save Fee Structure'}
                 </Button>
+
+                {/* Message Display */}
+                {message && (
+                    <Typography
+                        variant="body1"
+                        sx={{
+                            marginTop: 2,
+                            color: message.includes('successfully') ? '#2E7D32' : '#D32F2F',
+                        }}
+                    >
+                        {message}
+                    </Typography>
+                )}
             </Box>
         </Paper>
     );
