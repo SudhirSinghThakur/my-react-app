@@ -41,11 +41,14 @@ const FeeConfiguration: React.FC = () => {
             return;
         }
 
+        // Prepare the payload matching the C# model
         const payload = {
-            className,
-            academicYear,
-            particulars,
-            totalFee,
+            className, // Matches ClassName in the C# model
+            academicYear, // Matches AcademicYear in the C# model
+            admissionFee: particulars.admissionFee, // Matches AdmissionFee in the C# model
+            tuitionFee: particulars.tuitionFee, // Matches TuitionFee in the C# model
+            otherFee: particulars.otherFee, // Matches OtherFee in the C# model
+            totalFee, // Matches TotalFee in the C# model
         };
 
         try {
@@ -58,7 +61,7 @@ const FeeConfiguration: React.FC = () => {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${localStorage.getItem('token')}`,
                 },
-                body: JSON.stringify(payload),
+                body: JSON.stringify(payload), // Send the payload as JSON
             });
 
             if (response.ok) {
